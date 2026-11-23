@@ -1,9 +1,20 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" data-theme="light">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>CodeLab</title>
+<script>
+  /* Apply the saved (or system) theme before the page paints, so it does not flash. */
+  (function () {
+    var t = null;
+    try { t = localStorage.getItem('codelab:theme'); } catch (e) {}
+    if (t !== 'light' && t !== 'dark') {
+      t = (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) ? 'dark' : 'light';
+    }
+    document.documentElement.setAttribute('data-theme', t);
+  })();
+</script>
 <style>
   :root {
     --bg: #f6f7f9;
@@ -14,6 +25,7 @@
     --accent: #3b5bdb;
     --accent-text: #ffffff;
     --editor-bg: #fbfcfd;
+    --selection: rgba(59, 91, 219, 0.28);
     --out-bg: #12171f;
     --out-text: #e6edf3;
     --out-err: #ff8a80;
@@ -24,29 +36,43 @@
     --bad-border: #d64545;
     --bad-text: #8f1f1f;
     --radius: 12px;
+    --tk-keyword: #8250df;
+    --tk-type: #0b7285;
+    --tk-function: #0550ae;
+    --tk-string: #0a7d3e;
+    --tk-number: #b35900;
+    --tk-comment: #667085;
+    --tk-preproc: #b0306a;
   }
-  @media (prefers-color-scheme: dark) {
-    :root {
-      --bg: #0f141b;
-      --surface: #171e28;
-      --text: #e6ebf2;
-      --muted: #9aa6b6;
-      --border: #2b3544;
-      --accent: #7c93ff;
-      --accent-text: #0f141b;
-      --editor-bg: #121821;
-      --out-bg: #0a0e14;
-      --good-bg: #123322;
-      --good-border: #3fbf7a;
-      --good-text: #9be8bd;
-      --bad-bg: #3a1618;
-      --bad-border: #ef6b6b;
-      --bad-text: #ffb4b4;
-    }
+  :root[data-theme="dark"] {
+    --bg: #0f141b;
+    --surface: #171e28;
+    --text: #e6ebf2;
+    --muted: #9aa6b6;
+    --border: #2b3544;
+    --accent: #7c93ff;
+    --accent-text: #0f141b;
+    --editor-bg: #121821;
+    --selection: rgba(124, 147, 255, 0.35);
+    --out-bg: #0a0e14;
+    --good-bg: #123322;
+    --good-border: #3fbf7a;
+    --good-text: #9be8bd;
+    --bad-bg: #3a1618;
+    --bad-border: #ef6b6b;
+    --bad-text: #ffb4b4;
+    --tk-keyword: #c4a7ff;
+    --tk-type: #5fd7e8;
+    --tk-function: #82b1ff;
+    --tk-string: #7ee2a8;
+    --tk-number: #ffb86b;
+    --tk-comment: #8b98a9;
+    --tk-preproc: #ff9ac1;
   }
   * { box-sizing: border-box; }
   [hidden] { display: none !important; }
-  html { -webkit-text-size-adjust: 100%; }
+  html { -webkit-text-size-adjust: 100%; color-scheme: light; }
+  html[data-theme="dark"] { color-scheme: dark; }
   body {
     margin: 0; background: var(--bg); color: var(--text);
     font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
@@ -54,9 +80,10 @@
   }
   .wrap { max-width: 1040px; margin: 0 auto; padding: 0 16px; }
   header.top { background: var(--surface); border-bottom: 1px solid var(--border); }
-  header.top .wrap { padding-top: 18px; padding-bottom: 16px; }
+  header.top .wrap { padding-top: 14px; padding-bottom: 14px; display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
   h1 { margin: 0; font-size: 1.5rem; letter-spacing: -0.01em; }
   #siteTagline { margin: 2px 0 0; color: var(--muted); font-size: 0.95rem; }
+  .top-controls { display: flex; gap: 8px; flex-wrap: wrap; }
 
   .banner-error {
     margin: 24px auto; max-width: 720px; padding: 16px 18px; border-radius: var(--radius);
@@ -64,13 +91,44 @@
   }
 
   main { padding-top: 20px; padding-bottom: 48px; }
-  .langs { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; }
+  button:focus-visible, textarea:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+  .btn {
+    font: inherit; cursor: pointer; padding: 9px 18px; border-radius: 8px;
+    border: 1px solid var(--border); background: var(--surface); color: var(--text);
+  }
+  .btn:hover { border-color: var(--accent); }
+  .btn.small { padding: 6px 12px; font-size: 0.88rem; }
+  .btn.primary { background: var(--accent); color: var(--accent-text); border-color: var(--accent); font-weight: 600; }
+  .btn:disabled { opacity: 0.6; cursor: wait; }
+
+  /* ---------- Start screen ---------- */
+  .welcome { text-align: center; padding: 24px 0 8px; }
+  .welcome h2 { margin: 0 0 6px; font-size: 1.6rem; letter-spacing: -0.01em; }
+  .welcome p { margin: 0 auto 26px; color: var(--muted); max-width: 520px; }
+  .lang-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; text-align: left; }
+  @media (min-width: 720px) { .lang-grid { grid-template-columns: repeat(3, 1fr); } }
+  .lang-card {
+    font: inherit; color: inherit; cursor: pointer; text-align: left; display: flex; flex-direction: column; gap: 6px;
+    padding: 18px; border-radius: var(--radius); border: 2px solid var(--border); background: var(--surface);
+    transition: transform 0.12s, border-color 0.12s;
+  }
+  .lang-card:hover { border-color: var(--accent); transform: translateY(-2px); }
+  .lang-tag {
+    align-self: flex-start; min-width: 46px; height: 38px; padding: 0 10px; border-radius: 10px; display: grid; place-items: center;
+    background: var(--accent); color: var(--accent-text); font-weight: 800; font-size: 0.95rem;
+  }
+  .lang-name { font-size: 1.1rem; font-weight: 700; }
+  .lang-blurb { font-size: 0.85rem; color: var(--muted); }
+  @media (prefers-reduced-motion: reduce) { .lang-card { transition: none; } .lang-card:hover { transform: none; } }
+
+  .langs { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; align-items: center; }
   .pill {
     font: inherit; cursor: pointer; padding: 7px 16px; border-radius: 999px;
     border: 1px solid var(--border); background: var(--surface); color: var(--text);
   }
   .pill:hover { border-color: var(--accent); }
   .pill[aria-pressed="true"] { background: var(--accent); color: var(--accent-text); border-color: var(--accent); font-weight: 600; }
+  .pill.home { border-style: dashed; color: var(--muted); }
 
   .tabs { display: flex; gap: 4px; border-bottom: 1px solid var(--border); margin-bottom: 18px; }
   .tab {
@@ -79,29 +137,44 @@
   }
   .tab[aria-selected="true"] { color: var(--text); border-bottom-color: var(--accent); font-weight: 600; }
 
-  button:focus-visible, textarea:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
-
-  .btn {
-    font: inherit; cursor: pointer; padding: 9px 18px; border-radius: 8px;
-    border: 1px solid var(--border); background: var(--surface); color: var(--text);
-  }
-  .btn:hover { border-color: var(--accent); }
-  .btn.primary { background: var(--accent); color: var(--accent-text); border-color: var(--accent); font-weight: 600; }
-  .btn:disabled { opacity: 0.6; cursor: wait; }
-
   /* ---------- Code runner ---------- */
   .runner { display: grid; grid-template-columns: 1fr; gap: 16px; }
   @media (min-width: 860px) { .runner { grid-template-columns: 1fr 1fr; } }
-  .panel { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; display: flex; flex-direction: column; }
+  .panel { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; display: flex; flex-direction: column; min-width: 0; }
   .panel-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 10px 14px; border-bottom: 1px solid var(--border); font-size: 0.85rem; color: var(--muted); }
   .panel-head strong { color: var(--text); }
-  textarea.code {
-    width: 100%; min-height: 340px; border: none; resize: vertical; padding: 14px;
-    background: var(--editor-bg); color: var(--text);
+
+  /* The editor is a transparent textarea laid over a coloured copy of the same text. */
+  .editor-wrap { position: relative; height: 360px; background: var(--editor-bg); }
+  .editor-wrap pre, .editor-wrap textarea {
+    position: absolute; top: 0; right: 0; bottom: 0; left: 0; margin: 0; width: 100%; height: 100%;
+    padding: 14px; border: 0; border-radius: 0;
     font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
-    font-size: 0.92rem; line-height: 1.55; tab-size: 4; white-space: pre; overflow: auto;
+    font-size: 14.5px; line-height: 22px; letter-spacing: 0; word-spacing: 0;
+    font-variant-ligatures: none; font-kerning: none; tab-size: 4; -moz-tab-size: 4;
+    white-space: pre; word-wrap: normal; overflow-wrap: normal; text-align: left;
   }
-  textarea.stdin { min-height: 70px; border-top: 1px solid var(--border); }
+  .editor-wrap pre.hl { color: var(--text); overflow: hidden; pointer-events: none; padding-bottom: 44px; }
+  .editor-wrap pre.hl code { font: inherit; }
+  .editor-wrap textarea {
+    resize: none; overflow: auto; background: transparent; color: transparent;
+    -webkit-text-fill-color: transparent; caret-color: var(--text);
+  }
+  .editor-wrap textarea::selection { background: var(--selection); }
+  .editor-wrap textarea:focus-visible, textarea.stdin:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
+  .tk-kw { color: var(--tk-keyword); }
+  .tk-type { color: var(--tk-type); }
+  .tk-fn { color: var(--tk-function); }
+  .tk-str { color: var(--tk-string); }
+  .tk-num { color: var(--tk-number); }
+  .tk-com { color: var(--tk-comment); }
+  .tk-pre { color: var(--tk-preproc); }
+
+  textarea.stdin {
+    width: 100%; min-height: 70px; border: none; border-top: 1px solid var(--border); resize: vertical; padding: 12px 14px;
+    background: var(--editor-bg); color: var(--text);
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace; font-size: 14px; line-height: 1.5;
+  }
   .toolbar { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; padding: 10px 14px; border-top: 1px solid var(--border); }
   .toolbar .hint { color: var(--muted); font-size: 0.8rem; margin-left: auto; }
   #outputBox { background: var(--out-bg); color: var(--out-text); min-height: 340px; padding: 14px; overflow: auto; flex: 1; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 0.9rem; }
@@ -118,7 +191,12 @@
   .card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 24px; max-width: 760px; margin: 0 auto; }
   .card h2 { margin: 0 0 8px; font-size: 1.25rem; }
   .card p { margin: 0 0 16px; }
-  .progress-row { display: flex; justify-content: space-between; font-size: 0.85rem; color: var(--muted); margin-bottom: 8px; }
+  .round-list { display: grid; gap: 10px; margin: 0 0 14px; }
+  .round-btn { text-align: left; display: flex; justify-content: space-between; gap: 12px; align-items: center; width: 100%; }
+  .round-btn[disabled] { cursor: not-allowed; opacity: 0.55; }
+  .round-btn .tagline { font-size: 0.85rem; color: var(--muted); }
+  .linklike { font: inherit; background: none; border: none; padding: 0; color: var(--muted); text-decoration: underline; cursor: pointer; font-size: 0.85rem; }
+  .progress-row { display: flex; justify-content: space-between; gap: 12px; font-size: 0.85rem; color: var(--muted); margin-bottom: 8px; flex-wrap: wrap; }
   .bar { height: 6px; background: var(--border); border-radius: 99px; overflow: hidden; margin-bottom: 20px; }
   .bar > span { display: block; height: 100%; background: var(--accent); width: 0; transition: width 0.25s; }
   .question { font-size: 1.1rem; font-weight: 600; margin: 0 0 12px; }
@@ -137,11 +215,14 @@
     flex: none; width: 26px; height: 26px; border-radius: 50%; display: grid; place-items: center;
     background: var(--border); font-size: 0.8rem; font-weight: 700;
   }
-  .option .label { flex: 1; padding-top: 2px; }
+  .option .label { flex: 1; padding-top: 2px; white-space: pre-wrap; word-break: break-word; }
   .option .mark { flex: none; font-weight: 700; padding-top: 2px; }
   .option:disabled { cursor: default; color: var(--text); opacity: 0.75; }
   .option.correct { background: var(--good-bg); border-color: var(--good-border); color: var(--good-text); opacity: 1; }
   .option.wrong { background: var(--bad-bg); border-color: var(--bad-border); color: var(--bad-text); opacity: 1; }
+  .option.correct:disabled, .option.wrong:disabled { opacity: 1; }
+  .option.correct:disabled { color: var(--good-text); }
+  .option.wrong:disabled { color: var(--bad-text); }
   .option.correct .letter { background: var(--good-border); color: #fff; }
   .option.wrong .letter { background: var(--bad-border); color: #fff; }
   .feedback { border-radius: 10px; padding: 14px 16px; margin-bottom: 16px; border: 1px solid; }
@@ -153,9 +234,9 @@
   .score-msg { font-size: 1.1rem; margin-bottom: 18px; color: var(--muted); }
   .review { list-style: none; padding: 0; margin: 0 0 20px; display: grid; gap: 8px; }
   .review li { padding: 10px 12px; border-radius: 8px; border-left: 4px solid; font-size: 0.92rem; }
-  .review li.good { background: var(--good-bg); border-color: var(--good-border); }
-  .review li.bad { background: var(--bad-bg); border-color: var(--bad-border); }
-  .review small { display: block; color: var(--muted); margin-top: 2px; }
+  .review li.good { background: var(--good-bg); border-color: var(--good-border); color: var(--good-text); }
+  .review li.bad { background: var(--bad-bg); border-color: var(--bad-border); color: var(--bad-text); }
+  .review small { display: block; margin-top: 2px; opacity: 0.85; }
   .actions { display: flex; gap: 10px; flex-wrap: wrap; }
 
   footer { text-align: center; color: var(--muted); font-size: 0.8rem; padding: 0 16px 28px; }
@@ -165,10 +246,18 @@
 
 <header class="top">
   <div class="wrap">
-    <h1 id="siteTitle">CodeLab</h1>
-    <p id="siteTagline"></p>
+    <div>
+      <h1 id="siteTitle">CodeLab</h1>
+      <p id="siteTagline"></p>
+    </div>
+    <div class="top-controls">
+      <button class="btn small" id="soundBtn" type="button" aria-pressed="true">Sound: On</button>
+      <button class="btn small" id="themeBtn" type="button">Dark mode</button>
+    </div>
   </div>
 </header>
+
+<noscript><div class="banner-error"><strong>JavaScript is turned off.</strong> This site needs JavaScript to run.</div></noscript>
 
 <div id="loadError" class="banner-error" hidden>
   <strong>The site could not start.</strong><br>
@@ -181,65 +270,82 @@
 </div>
 
 <main class="wrap" id="app">
-  <nav class="langs" id="langs" aria-label="Choose a language"></nav>
 
-  <div class="tabs" role="tablist">
-    <button class="tab" role="tab" id="tabRunner" aria-selected="true">Code runner</button>
-    <button class="tab" role="tab" id="tabQuiz" aria-selected="false">Quiz</button>
-  </div>
+  <!-- ===================== START SCREEN ===================== -->
+  <section class="welcome" id="welcome">
+    <h2 id="welcomeHeading">Choose a language to start</h2>
+    <p id="welcomeSub"></p>
+    <div class="lang-grid" id="langCards"></div>
+  </section>
 
-  <!-- ===================== CODE RUNNER ===================== -->
-  <section id="runnerPanel" aria-labelledby="tabRunner">
-    <div class="runner">
-      <div class="panel">
-        <div class="panel-head"><span><strong id="editorLang">Python</strong> editor</span><span id="editorHint"></span></div>
-        <textarea id="editor" class="code" spellcheck="false" autocapitalize="off" autocomplete="off" autocorrect="off" aria-label="Code editor"></textarea>
-        <textarea id="stdin" class="code stdin" spellcheck="false" placeholder="Input for the program (optional) - one value per line" aria-label="Program input"></textarea>
-        <div class="toolbar">
-          <button class="btn primary" id="runBtn">&#9654; Run</button>
-          <button class="btn" id="resetCodeBtn">Reset code</button>
-          <button class="btn" id="resetDbBtn" hidden>Reset sample database</button>
-          <span class="hint">Ctrl/Cmd + Enter to run &middot; Tab inserts spaces (Esc then Tab to leave)</span>
+  <!-- ===================== MAIN SITE ===================== -->
+  <div id="workspace" hidden>
+    <nav class="langs" id="langs" aria-label="Choose a language"></nav>
+
+    <div class="tabs" role="tablist">
+      <button class="tab" role="tab" id="tabRunner" aria-selected="true">Code runner</button>
+      <button class="tab" role="tab" id="tabQuiz" aria-selected="false">Quiz</button>
+    </div>
+
+    <!-- CODE RUNNER -->
+    <section id="runnerPanel" aria-labelledby="tabRunner">
+      <div class="runner">
+        <div class="panel">
+          <div class="panel-head"><span><strong id="editorLang">Python</strong> editor</span></div>
+          <div class="editor-wrap" id="editorWrap">
+            <pre class="hl" id="hl" aria-hidden="true"><code id="hlCode"></code></pre>
+            <textarea id="editor" spellcheck="false" autocapitalize="off" autocomplete="off" autocorrect="off" aria-label="Code editor"></textarea>
+          </div>
+          <textarea id="stdin" class="stdin" spellcheck="false" placeholder="Input for the program (optional) - one value per line" aria-label="Program input"></textarea>
+          <div class="toolbar">
+            <button class="btn primary" id="runBtn">&#9654; Run</button>
+            <button class="btn" id="resetCodeBtn">Reset code</button>
+            <button class="btn" id="resetDbBtn" hidden>Reset sample database</button>
+            <span class="hint">Ctrl/Cmd + Enter to run</span>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-head"><strong>Output</strong><span id="status" aria-live="polite"></span></div>
+          <div id="outputBox" aria-live="polite"><span class="muted">Press Run to see the output here.</span></div>
         </div>
       </div>
+      <p class="note" id="runnerNote" hidden></p>
+    </section>
 
-      <div class="panel">
-        <div class="panel-head"><strong>Output</strong><span id="status" aria-live="polite"></span></div>
-        <div id="outputBox" aria-live="polite"><span class="muted">Press Run to see the output here.</span></div>
+    <!-- QUIZ -->
+    <section id="quizPanel" aria-labelledby="tabQuiz" hidden>
+      <div class="card" id="quizStart">
+        <h2 id="quizStartTitle">Quiz</h2>
+        <p id="quizStartText"></p>
+        <div class="round-list" id="roundList"></div>
+        <button class="linklike" id="resetProgressBtn" type="button">Reset my quiz progress for this language</button>
       </div>
-    </div>
-    <p class="note" id="runnerNote" hidden></p>
-  </section>
 
-  <!-- ===================== QUIZ ===================== -->
-  <section id="quizPanel" aria-labelledby="tabQuiz" hidden>
-    <div class="card" id="quizStart">
-      <h2 id="quizStartTitle">Quiz</h2>
-      <p id="quizStartText"></p>
-      <button class="btn primary" id="quizStartBtn">Start quiz</button>
-    </div>
-
-    <div class="card" id="quizQuestion" hidden>
-      <div class="progress-row"><span id="qProgressText"></span><span id="qScoreText"></span></div>
-      <div class="bar"><span id="qBar"></span></div>
-      <p class="question" id="qText"></p>
-      <pre class="qcode" id="qCode" hidden></pre>
-      <div class="options" id="qOptions"></div>
-      <div class="feedback" id="qFeedback" hidden aria-live="polite"></div>
-      <button class="btn primary" id="qNext" hidden>Next question</button>
-    </div>
-
-    <div class="card" id="quizResult" hidden>
-      <h2>Your result</h2>
-      <p class="score-big" id="rScore"></p>
-      <p class="score-msg" id="rMsg"></p>
-      <ul class="review" id="rReview"></ul>
-      <div class="actions">
-        <button class="btn primary" id="rRetry">Try again</button>
-        <button class="btn" id="rToRunner">Back to code runner</button>
+      <div class="card" id="quizQuestion" hidden>
+        <div class="progress-row"><span id="qProgressText"></span><span id="qRoundText"></span><span id="qScoreText"></span></div>
+        <div class="bar"><span id="qBar"></span></div>
+        <p class="question" id="qText"></p>
+        <pre class="qcode" id="qCode" hidden></pre>
+        <div class="options" id="qOptions"></div>
+        <div class="feedback" id="qFeedback" hidden aria-live="polite"></div>
+        <button class="btn primary" id="qNext" hidden>Next question</button>
       </div>
-    </div>
-  </section>
+
+      <div class="card" id="quizResult" hidden>
+        <h2 id="rTitle">Your result</h2>
+        <p class="score-big" id="rScore"></p>
+        <p class="score-msg" id="rMsg"></p>
+        <ul class="review" id="rReview"></ul>
+        <div class="actions">
+          <button class="btn primary" id="rNext" hidden>Next round</button>
+          <button class="btn" id="rRetry">Try again with new questions</button>
+          <button class="btn" id="rToRounds">All rounds</button>
+          <button class="btn" id="rToRunner">Back to code runner</button>
+        </div>
+      </div>
+    </section>
+  </div>
 </main>
 
 <footer id="footer"></footer>
@@ -265,12 +371,22 @@
     return;
   }
 
-  /* ---------- Small helpers ---------- */
+  /* Optional settings with safe defaults (so an older settings.js still works). */
+  var EDIT = (typeof EDITOR !== 'undefined' && EDITOR) ? EDITOR : { autoCloseBrackets: true, autoIndent: true };
+  var SND = (typeof SOUNDS !== 'undefined' && SOUNDS) ? SOUNDS : { enabledByDefault: true, vibrateOnWrong: true };
+  var COLORS = (typeof SYNTAX_COLORS !== 'undefined' && SYNTAX_COLORS) ? SYNTAX_COLORS : null;
+  var UNIT = new Array((SITE.indentSize || 4) + 1).join(' ');
+
   var PYODIDE_BASE = 'https://cdn.jsdelivr.net/pyodide/v0.26.4/full/';
   var SQLJS_BASE = 'https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.10.3/';
 
+  /* ---------- Small helpers ---------- */
   function store(key, value) {
-    try { if (value === undefined) return localStorage.getItem('codelab:' + key); localStorage.setItem('codelab:' + key, value); } catch (e) {}
+    try {
+      if (value === undefined) return localStorage.getItem('codelab:' + key);
+      if (value === null) { localStorage.removeItem('codelab:' + key); return null; }
+      localStorage.setItem('codelab:' + key, value);
+    } catch (e) {}
     return null;
   }
   function loadScript(src) {
@@ -293,38 +409,239 @@
     if (text !== undefined) e.textContent = text;
     return e;
   }
+  function esc(s) { return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
 
   /* ---------- Page setup ---------- */
   document.title = SITE.title + ' - ' + (SITE.tagline || '');
   $('siteTitle').textContent = SITE.title;
   $('siteTagline').textContent = SITE.tagline || '';
   $('footer').textContent = SITE.title;
+  $('welcomeHeading').textContent = SITE.welcomeHeading || 'Choose a language to start';
+  $('welcomeSub').textContent = SITE.welcomeSub || '';
 
+  /* ---------- Theme (bright / dark) ---------- */
+  var root = document.documentElement;
+  var theme = root.getAttribute('data-theme') === 'dark' ? 'dark' : 'light';
+  function applyTheme(t) {
+    theme = t;
+    root.setAttribute('data-theme', t);
+    store('theme', t);
+    if (COLORS && COLORS[t]) {
+      Object.keys(COLORS[t]).forEach(function (k) { root.style.setProperty('--tk-' + k, COLORS[t][k]); });
+    }
+    var b = $('themeBtn');
+    b.textContent = t === 'dark' ? 'Bright mode' : 'Dark mode';
+    b.setAttribute('aria-label', 'Switch to ' + (t === 'dark' ? 'bright' : 'dark') + ' theme');
+  }
+  $('themeBtn').addEventListener('click', function () { applyTheme(theme === 'dark' ? 'light' : 'dark'); });
+  applyTheme(theme);
+
+  /* ---------- Sounds (generated by the browser, no audio files) ---------- */
+  var soundOn = store('sound') === null ? SND.enabledByDefault !== false : store('sound') === 'on';
+  var audioCtx = null;
+  function updateSoundBtn() {
+    var b = $('soundBtn');
+    b.textContent = soundOn ? 'Sound: On' : 'Sound: Off';
+    b.setAttribute('aria-pressed', String(soundOn));
+  }
+  $('soundBtn').addEventListener('click', function () {
+    soundOn = !soundOn; store('sound', soundOn ? 'on' : 'off'); updateSoundBtn();
+    if (soundOn) playTones([[880, 0, 0.1, 'sine', 0.08]]);
+  });
+  updateSoundBtn();
+
+  function getAudio() {
+    if (!audioCtx) {
+      var AC = window.AudioContext || window.webkitAudioContext;
+      if (!AC) return null;
+      try { audioCtx = new AC(); } catch (e) { return null; }
+    }
+    if (audioCtx.state === 'suspended') { try { audioCtx.resume(); } catch (e) {} }
+    return audioCtx;
+  }
+  /* notes: [frequency Hz, start seconds, length seconds, wave type, volume] */
+  function playTones(notes) {
+    if (!soundOn) return;
+    var ctx = getAudio();
+    if (!ctx) return;
+    var now = ctx.currentTime;
+    notes.forEach(function (n) {
+      var osc = ctx.createOscillator(), gain = ctx.createGain();
+      osc.type = n[3]; osc.frequency.value = n[0];
+      var t0 = now + n[1], t1 = t0 + n[2];
+      gain.gain.setValueAtTime(0.0001, t0);
+      gain.gain.exponentialRampToValueAtTime(n[4], t0 + 0.015);
+      gain.gain.exponentialRampToValueAtTime(0.0001, t1);
+      osc.connect(gain); gain.connect(ctx.destination);
+      osc.start(t0); osc.stop(t1 + 0.03);
+    });
+  }
+  function soundCorrect() { playTones([[660, 0, 0.12, 'sine', 0.16], [880, 0.12, 0.26, 'sine', 0.16]]); }
+  function soundWrong() {
+    playTones([[170, 0, 0.32, 'sawtooth', 0.12]]);
+    if (soundOn && SND.vibrateOnWrong !== false && navigator.vibrate) { try { navigator.vibrate(220); } catch (e) {} }
+  }
+  function soundFanfare() {
+    playTones([[523, 0, 0.14, 'triangle', 0.16], [659, 0.14, 0.14, 'triangle', 0.16], [784, 0.28, 0.14, 'triangle', 0.16], [1047, 0.42, 0.4, 'triangle', 0.16]]);
+  }
+
+  /* ---------- Syntax colouring ---------- */
+  function words(s) { var o = {}; s.split(/\s+/).forEach(function (w) { if (w) o[w] = true; }); return o; }
+  var SYNTAX = {
+    c: {
+      line: '//', block: true, preproc: true, upperType: false,
+      kw: words('auto break case const continue default do else enum extern for goto if inline register restrict return sizeof static struct switch typedef union volatile while'),
+      types: words('int char short long float double void signed unsigned size_t FILE bool _Bool'),
+      consts: words('NULL true false EOF')
+    },
+    cpp: {
+      line: '//', block: true, preproc: true, upperType: true,
+      kw: words('alignas auto break case catch class const constexpr continue default delete do else enum explicit export extern final for friend goto if inline mutable namespace new noexcept operator override private protected public register return sizeof static static_cast dynamic_cast const_cast reinterpret_cast struct switch template this throw try typedef typename union using virtual volatile while'),
+      types: words('int char short long float double void signed unsigned bool string vector map set unordered_map unordered_set pair array deque list stack queue size_t cout cin cerr endl std wchar_t auto'),
+      consts: words('true false nullptr NULL')
+    },
+    python: {
+      line: '#', block: false, triple: true, upperType: true,
+      kw: words('and as assert async await break class continue def del elif else except finally for from global if import in is lambda nonlocal not or pass raise return try while with yield match case'),
+      types: words('int str float bool list dict set tuple bytes object type range'),
+      consts: words('True False None')
+    },
+    java: {
+      line: '//', block: true, upperType: true,
+      kw: words('abstract assert break case catch class const continue default do else enum extends final finally for goto if implements import instanceof interface native new package private protected public return static strictfp super switch synchronized this throw throws transient try volatile while var record'),
+      types: words('int long short byte float double char boolean void String Integer Double Boolean Character Object List ArrayList Map HashMap Set HashSet Math System Scanner'),
+      consts: words('true false null')
+    },
+    javascript: {
+      line: '//', block: true, backtick: true, upperType: true,
+      kw: words('async await break case catch class const continue debugger default delete do else export extends finally for function if import in instanceof let new of return static super switch this throw try typeof var void while with yield get set'),
+      types: words('Array Object String Number Boolean Map Set Promise Math JSON Date RegExp Symbol Error console document window'),
+      consts: words('true false null undefined NaN Infinity')
+    },
+    sql: {
+      line: '--', block: true, ci: true, upperType: false,
+      kw: words('select from where and or not in is null like between exists distinct group by having order asc desc limit offset join inner left right full outer cross on as union all insert into values update set delete create table drop alter add column primary key foreign references default unique index view case when then else end with limit begin commit rollback transaction check constraint autoincrement'),
+      types: words('integer int text real blob numeric varchar char date datetime boolean float double decimal'),
+      consts: words('null true false')
+    }
+  };
+  function escRe(s) { return s.replace(/[.*+?^${}()|[\]\\\/]/g, '\\$&'); }
+
+  /* Build one regular expression per language; each group is one kind of token. */
+  Object.keys(SYNTAX).forEach(function (k) {
+    var cfg = SYNTAX[k], p = [], cls = [];
+    function add(c, s) { cls.push(c); p.push('(' + s + ')'); }
+    if (cfg.block) add('com', '\\/\\*[\\s\\S]*?(?:\\*\\/|(?![\\s\\S]))');
+    add('com', escRe(cfg.line) + '[^\\n]*');
+    if (cfg.preproc) {
+      add('pre', '^[ \\t]*#[ \\t]*include[ \\t]*(?:<[^>\\n]*>?|"[^"\\n]*"?)');
+      add('pre', '^[ \\t]*#[ \\t]*[A-Za-z_]+');
+    }
+    if (cfg.triple) add('str', '"""[\\s\\S]*?(?:"""|(?![\\s\\S]))|\'\'\'[\\s\\S]*?(?:\'\'\'|(?![\\s\\S]))');
+    add('str', '"(?:\\\\.|[^"\\\\\\n])*"?');
+    add('str', "'(?:\\\\.|[^'\\\\\\n])*'?");
+    if (cfg.backtick) add('str', '`(?:\\\\[\\s\\S]|[^`\\\\])*`?');
+    add('num', '\\b(?:0[xX][0-9a-fA-F]+|\\d+\\.?\\d*(?:[eE][+-]?\\d+)?)[uUlLfF]*\\b');
+    add('id', '[A-Za-z_$][\\w$]*');
+    cfg.cls = cls;
+    cfg.source = p.join('|');
+  });
+
+  function highlight(src, langKey) {
+    var cfg = SYNTAX[langKey];
+    if (!cfg) return esc(src);
+    var re = new RegExp(cfg.source, 'gm'), out = '', last = 0, m, i, c;
+    while ((m = re.exec(src)) !== null) {
+      if (m[0].length === 0) { re.lastIndex++; continue; }
+      out += esc(src.slice(last, m.index));
+      c = null;
+      for (i = 0; i < cfg.cls.length; i++) { if (m[i + 1] !== undefined) { c = cfg.cls[i]; break; } }
+      var text = m[0];
+      if (c === 'id') {
+        var key = cfg.ci ? text.toLowerCase() : text;
+        if (cfg.kw[key]) c = 'kw';
+        else if (cfg.consts[key]) c = 'num';
+        else if (cfg.types[text]) c = 'type';
+        else {
+          var j = m.index + text.length;
+          while (j < src.length && (src.charAt(j) === ' ' || src.charAt(j) === '\t')) j++;
+          if (src.charAt(j) === '(') c = 'fn';
+          else if (cfg.upperType && /^[A-Z][A-Za-z0-9_]*[a-z]/.test(text)) c = 'type';
+          else if (cfg.ci && cfg.types[key]) c = 'type';
+          else c = null;
+        }
+        if (cfg.ci && !c && cfg.types[key]) c = 'type';
+      }
+      out += c ? '<span class="tk-' + c + '">' + esc(text) + '</span>' : esc(text);
+      last = m.index + m[0].length;
+    }
+    return out + esc(src.slice(last));
+  }
+
+  /* ---------- Elements and state ---------- */
   var langKeys = Object.keys(LANGUAGES);
-  var lang = store('lang');
-  if (!lang || !LANGUAGES[lang]) lang = langKeys[0];
-
-  var editor = $('editor');
-  var stdinBox = $('stdin');
-  var outputBox = $('outputBox');
-  var statusEl = $('status');
-  var runBtn = $('runBtn');
+  var lang = null;
+  var codeMem = {};            /* code typed this visit, kept only in memory: a refresh brings back the welcome program */
+  var editor = $('editor'), hl = $('hl'), hlCode = $('hlCode');
+  var stdinBox = $('stdin'), outputBox = $('outputBox'), statusEl = $('status'), runBtn = $('runBtn');
   var running = false;
+  var quiz = null;
 
-  /* language pills */
-  var pillWrap = $('langs');
+  function renderHL() {
+    hlCode.innerHTML = highlight(editor.value, lang) + '\n';
+    hl.scrollTop = editor.scrollTop; hl.scrollLeft = editor.scrollLeft;
+  }
+  editor.addEventListener('scroll', function () { hl.scrollTop = editor.scrollTop; hl.scrollLeft = editor.scrollLeft; });
+  editor.addEventListener('input', function () { if (lang) codeMem[lang] = editor.value; renderHL(); });
+
+  /* ---------- Start screen and language buttons ---------- */
+  var cardWrap = $('langCards'), pillWrap = $('langs');
+  langKeys.forEach(function (key) {
+    var L = LANGUAGES[key];
+    var card = el('button', 'lang-card');
+    card.type = 'button';
+    card.appendChild(el('span', 'lang-tag', L.tag || L.label));
+    card.appendChild(el('span', 'lang-name', L.label));
+    if (L.blurb) card.appendChild(el('span', 'lang-blurb', L.blurb));
+    card.addEventListener('click', function () { chooseLanguage(key); });
+    cardWrap.appendChild(card);
+  });
+
+  var homeBtn = el('button', 'pill home', 'All languages');
+  homeBtn.type = 'button';
+  homeBtn.addEventListener('click', function () {
+    if (!confirmLeaveQuiz()) return;
+    quiz = null;
+    $('workspace').hidden = true;
+    $('welcome').hidden = false;
+  });
+  pillWrap.appendChild(homeBtn);
   langKeys.forEach(function (key) {
     var b = el('button', 'pill', LANGUAGES[key].label);
     b.type = 'button';
     b.dataset.lang = key;
-    b.addEventListener('click', function () { setLanguage(key); });
+    b.addEventListener('click', function () {
+      if (key !== lang && !confirmLeaveQuiz()) return;
+      setLanguage(key);
+    });
     pillWrap.appendChild(b);
   });
 
+  function confirmLeaveQuiz() {
+    return !(quiz && !quiz.finished && quiz.i > 0) ||
+           window.confirm('Leave this quiz? Your progress in this round will be lost.');
+  }
+
+  function chooseLanguage(key) {
+    $('welcome').hidden = true;
+    $('workspace').hidden = false;
+    setLanguage(key, true);
+    setMode('runner');
+    editor.focus();
+  }
+
   /* tabs */
-  var mode = 'runner';
   function setMode(m) {
-    mode = m;
     $('runnerPanel').hidden = m !== 'runner';
     $('quizPanel').hidden = m !== 'quiz';
     $('tabRunner').setAttribute('aria-selected', String(m === 'runner'));
@@ -335,17 +652,15 @@
 
   function setLanguage(key, force) {
     if (!force && key === lang) return;
-    if (!force && quiz && !quiz.finished && quiz.i > 0 &&
-        !window.confirm('Leave this quiz? Your progress will be lost.')) return;
-    saveCode();
+    if (lang) codeMem[lang] = editor.value;
     lang = key;
-    store('lang', lang);
     var L = LANGUAGES[lang];
-    Array.prototype.forEach.call(pillWrap.children, function (b) {
+    Array.prototype.forEach.call(pillWrap.querySelectorAll('.pill[data-lang]'), function (b) {
       b.setAttribute('aria-pressed', String(b.dataset.lang === lang));
     });
-    var saved = store('code:' + lang);
-    editor.value = saved !== null ? saved : (STARTER_CODE[lang] || '');
+    editor.value = codeMem[lang] !== undefined ? codeMem[lang] : (STARTER_CODE[lang] || '');
+    editor.scrollTop = 0; editor.scrollLeft = 0;
+    renderHL();
     $('editorLang').textContent = L.label;
     var usesInput = L.runner !== 'javascript' && L.runner !== 'sql';
     stdinBox.hidden = !usesInput;
@@ -362,33 +677,125 @@
     resetQuizView();
   }
 
-  function saveCode() { if (lang) store('code:' + lang, editor.value); }
-  editor.addEventListener('input', saveCode);
-
-  /* Tab key inserts spaces; Esc then Tab leaves the box */
-  var escPressed = false;
-  editor.addEventListener('keydown', function (e) {
-    if (e.key === 'Escape') { escPressed = true; return; }
-    if (e.key === 'Tab' && !e.shiftKey) {
-      if (escPressed) { escPressed = false; return; }
-      e.preventDefault();
-      var s = editor.selectionStart, end = editor.selectionEnd;
-      editor.value = editor.value.slice(0, s) + '    ' + editor.value.slice(end);
-      editor.selectionStart = editor.selectionEnd = s + 4;
-      saveCode();
-      return;
-    }
-    escPressed = false;
-    if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') { e.preventDefault(); run(); }
-  });
-
   $('resetCodeBtn').addEventListener('click', function () {
-    if (window.confirm('Replace your code with the starter example?')) {
+    if (window.confirm('Replace your code with the welcome program?')) {
       editor.value = STARTER_CODE[lang] || '';
-      saveCode();
+      codeMem[lang] = editor.value;
+      renderHL();
     }
   });
   runBtn.addEventListener('click', run);
+
+  /* ---------- Editor helpers: auto-close brackets, auto-indent, Tab ---------- */
+  var PAIRS = { '(': ')', '[': ']', '{': '}', '"': '"', "'": "'", '`': '`' };
+  var CLOSERS = ')]}"\'`';
+  var busy = false;
+  function isWord(ch) { return !!ch && /[A-Za-z0-9_]/.test(ch); }
+
+  /* Replace text between s and e. execCommand keeps Ctrl+Z (undo) working. */
+  function replaceRange(s, e, text, caretStart, caretEnd) {
+    editor.setSelectionRange(s, e);
+    var ok = false;
+    busy = true;
+    try { ok = document.execCommand(text === '' ? 'delete' : 'insertText', false, text === '' ? undefined : text); } catch (x) { ok = false; }
+    busy = false;
+    if (!ok) {
+      editor.setRangeText(text, s, e, 'end');
+      codeMem[lang] = editor.value;
+      renderHL();
+    }
+    if (caretStart !== undefined) editor.setSelectionRange(caretStart, caretEnd === undefined ? caretStart : caretEnd);
+  }
+
+  function handleChar(e, ch, v, s, en) {
+    var auto = EDIT.autoCloseBrackets !== false;
+    /* typing a closing character right before the same one just steps over it */
+    if (auto && s === en && CLOSERS.indexOf(ch) > -1 && v.charAt(s) === ch) {
+      e.preventDefault(); editor.setSelectionRange(s + 1, s + 1); return;
+    }
+    /* a } typed on a line that only holds spaces moves one level left */
+    if (ch === '}' && EDIT.autoIndent !== false && s === en) {
+      var ls = v.lastIndexOf('\n', s - 1) + 1, before = v.slice(ls, s);
+      if (before.length > 0 && /^ +$/.test(before)) {
+        e.preventDefault();
+        var cut = Math.min(UNIT.length, before.length);
+        replaceRange(s - cut, s, '}', s - cut + 1);
+        return;
+      }
+    }
+    if (auto && PAIRS[ch]) {
+      var close = PAIRS[ch], isQuote = ch === close, prev = v.charAt(s - 1), next = v.charAt(s);
+      if (s !== en) {                                   /* wrap the selected text */
+        e.preventDefault();
+        var sel = v.slice(s, en);
+        replaceRange(s, en, ch + sel + close, s + 1, s + 1 + sel.length);
+        return;
+      }
+      if (isQuote) { if (isWord(prev) || isWord(next) || prev === ch) return; }
+      else if (isWord(next)) return;
+      e.preventDefault();
+      replaceRange(s, s, ch + close, s + 1);
+    }
+  }
+
+  function handleEnter(v, s, en) {
+    var ls = v.lastIndexOf('\n', s - 1) + 1;
+    var line = v.slice(ls, s);
+    var indent = line.match(/^[ \t]*/)[0];
+    var trimmed = line.replace(/\s+$/, '');
+    var last = trimmed.slice(-1), after = v.charAt(en);
+    var isPy = LANGUAGES[lang].runner === 'python';
+    var isComment = isPy ? /^\s*#/.test(line) : /^\s*(\/\/|--)/.test(line);
+    var extra = '';
+    if (!isComment && (last === '{' || last === '(' || last === '[' || (isPy && last === ':'))) extra = UNIT;
+    if (isPy && !extra && /^\s*(return|pass|break|continue|raise)\b/.test(line) && indent.length >= UNIT.length) {
+      indent = indent.slice(0, indent.length - UNIT.length);
+    }
+    var closer = { '{': '}', '(': ')', '[': ']' }[last];
+    var text, caret;
+    if (extra && closer && after === closer) {          /* Enter between { and } opens a block */
+      text = '\n' + indent + extra + '\n' + indent;
+      caret = s + 1 + indent.length + extra.length;
+    } else {
+      text = '\n' + indent + extra;
+      caret = s + text.length;
+    }
+    replaceRange(s, en, text, caret);
+  }
+
+  editor.addEventListener('beforeinput', function (e) {
+    if (busy || e.isComposing) return;
+    var t = e.inputType, v = editor.value, s = editor.selectionStart, en = editor.selectionEnd;
+    if (t === 'insertText' && typeof e.data === 'string' && e.data.length === 1) {
+      handleChar(e, e.data, v, s, en);
+    } else if ((t === 'insertLineBreak' || t === 'insertParagraph') && EDIT.autoIndent !== false) {
+      e.preventDefault(); handleEnter(v, s, en);
+    } else if (t === 'deleteContentBackward' && EDIT.autoCloseBrackets !== false && s === en && s > 0) {
+      if (PAIRS[v.charAt(s - 1)] && PAIRS[v.charAt(s - 1)] === v.charAt(s)) {   /* backspace inside () deletes both */
+        e.preventDefault(); replaceRange(s - 1, s + 1, '', s - 1);
+      }
+    }
+  });
+
+  var escPressed = false;
+  editor.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape') { escPressed = true; return; }
+    if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') { e.preventDefault(); run(); return; }
+    if (e.key === 'Tab') {
+      if (escPressed) { escPressed = false; return; }       /* Esc then Tab leaves the editor */
+      e.preventDefault();
+      var v = editor.value, s = editor.selectionStart, en = editor.selectionEnd;
+      if (e.shiftKey) {                                     /* Shift+Tab: move this line one level left */
+        var ls = v.lastIndexOf('\n', s - 1) + 1, k = 0;
+        while (k < UNIT.length && v.charAt(ls + k) === ' ') k++;
+        if (k > 0) replaceRange(ls, ls + k, '', Math.max(ls, s - k));
+      } else {
+        replaceRange(s, en, UNIT, s + UNIT.length);
+      }
+      return;
+    }
+    escPressed = false;
+  });
 
   /* ---------- Output ---------- */
   function clearOutput() { outputBox.textContent = ''; }
@@ -693,9 +1100,55 @@
     return { stdout: run.stdout || '', stderr: run.stderr || '' };
   }
 
-  /* ---------- Quiz ---------- */
-  var quiz = null;
+  /* ---------- Quiz: rounds, new questions each time ---------- */
   var LETTERS = ['A', 'B', 'C', 'D', 'E', 'F'];
+
+  function roundName(l) { return (SITE.roundNames && SITE.roundNames[l - 1]) || ('Round ' + l); }
+  function levelOf(q) { return q.level || 1; }
+  function questionsAt(level) { return (QUIZ_QUESTIONS[lang] || []).filter(function (q) { return levelOf(q) === level; }); }
+  function maxLevel() {
+    var m = 1;
+    (QUIZ_QUESTIONS[lang] || []).forEach(function (q) { if (levelOf(q) > m) m = levelOf(q); });
+    return m;
+  }
+  function qid(q) { return q.q + '|' + (q.code || ''); }
+  function getSeen(level) { try { return JSON.parse(store('seen:' + lang + ':' + level) || '[]'); } catch (e) { return []; } }
+  function setSeen(level, arr) { store('seen:' + lang + ':' + level, JSON.stringify(arr)); }
+  function getUnlocked() {
+    if (SITE.perfectScoreToUnlock === false) return maxLevel();
+    var n = parseInt(store('unlocked:' + lang) || '1', 10);
+    if (isNaN(n)) n = 1;
+    return Math.min(Math.max(n, 1), maxLevel());
+  }
+  function setUnlocked(n) { if (n > getUnlocked()) store('unlocked:' + lang, String(n)); }
+
+  /* Prefer questions the visitor has not seen yet; only repeat after they have seen them all. */
+  function pickQuestions(level) {
+    var pool = questionsAt(level);
+    var n = Math.min(pool.length, SITE.questionsPerQuiz || pool.length);
+    var seen = getSeen(level);
+    var unseen = pool.filter(function (q) { return seen.indexOf(qid(q)) < 0; });
+    var chosen;
+    if (unseen.length >= n) {
+      chosen = shuffle(unseen.slice()).slice(0, n);
+      seen = seen.concat(chosen.map(qid));
+    } else {
+      var rest = shuffle(pool.filter(function (q) { return unseen.indexOf(q) < 0; }));
+      chosen = unseen.concat(rest.slice(0, n - unseen.length));
+      seen = chosen.map(qid);                           /* start a fresh cycle */
+    }
+    setSeen(level, seen);
+    if (SITE.shuffleQuestions !== false) shuffle(chosen);
+    return chosen.map(prepare);
+  }
+
+  function prepare(q) {
+    var opts = q.options.map(function (t, i) { return { t: t, correct: i === q.answer }; });
+    if (SITE.shuffleOptions !== false) shuffle(opts);
+    var ans = 0;
+    opts.forEach(function (o, i) { if (o.correct) ans = i; });
+    return { q: q.q, code: q.code, options: opts.map(function (o) { return o.t; }), answer: ans, explain: q.explain };
+  }
 
   function showQuizView(which) {
     $('quizStart').hidden = which !== 'start';
@@ -705,25 +1158,47 @@
 
   function resetQuizView() {
     quiz = null;
-    var pool = QUIZ_QUESTIONS[lang] || [];
-    var n = Math.min(pool.length, SITE.questionsPerQuiz || pool.length);
-    $('quizStartTitle').textContent = LANGUAGES[lang].label + ' quiz';
-    if (!n) {
-      $('quizStartText').textContent = 'There are no questions for this language yet. Add some in questions.js.';
-      $('quizStartBtn').hidden = true;
-    } else {
-      $('quizStartText').textContent = n + ' multiple-choice questions. Pick an answer and you will see green if it is correct or red if it is wrong, with an explanation of the right concept. Your score appears at the end.';
-      $('quizStartBtn').hidden = false;
+    var L = LANGUAGES[lang];
+    $('quizStartTitle').textContent = L.label + ' quiz';
+    var list = $('roundList');
+    list.textContent = '';
+    var ml = maxLevel(), un = getUnlocked(), any = false;
+    for (var l = 1; l <= ml; l++) {
+      var count = questionsAt(l).length;
+      if (!count) continue;
+      any = true;
+      (function (level, total) {
+        var open = level <= un;
+        var b = el('button', 'btn round-btn' + (open && level === un ? ' primary' : ''));
+        b.type = 'button';
+        b.disabled = !open;
+        b.appendChild(el('span', null, roundName(level)));
+        b.appendChild(el('span', 'tagline', open ? Math.min(total, SITE.questionsPerQuiz || total) + ' questions' : 'Locked - get 100% in the round before'));
+        b.addEventListener('click', function () { startQuiz(level); });
+        list.appendChild(b);
+      })(l, count);
     }
+    $('resetProgressBtn').hidden = !any;
+    $('quizStartText').textContent = any
+      ? 'Pick a round. Choose an answer and it turns green if it is right or red if it is wrong, with an explanation. ' +
+        (SITE.perfectScoreToUnlock === false ? '' : 'Get every question right to unlock the next, harder round. ') +
+        'Each time you play you get new questions.'
+      : 'There are no questions for this language yet. Add some in questions.js.';
     showQuizView('start');
   }
 
-  function startQuiz() {
-    var pool = (QUIZ_QUESTIONS[lang] || []).slice();
-    if (!pool.length) return;
-    if (SITE.shuffleQuestions) shuffle(pool);
-    pool = pool.slice(0, SITE.questionsPerQuiz || pool.length);
-    quiz = { qs: pool, i: 0, score: 0, results: [], answered: false, finished: false };
+  $('resetProgressBtn').addEventListener('click', function () {
+    if (!window.confirm('Reset your quiz progress for ' + LANGUAGES[lang].label + '? Harder rounds will lock again.')) return;
+    store('unlocked:' + lang, null);
+    for (var l = 1; l <= maxLevel(); l++) store('seen:' + lang + ':' + l, null);
+    resetQuizView();
+  });
+
+  function startQuiz(level) {
+    var qs = pickQuestions(level);
+    if (!qs.length) return;
+    quiz = { level: level, qs: qs, i: 0, score: 0, results: [], answered: false, finished: false };
+    getAudio();                                         /* a click starts the sound system */
     showQuestion();
   }
 
@@ -732,6 +1207,7 @@
     quiz.answered = false;
     showQuizView('question');
     $('qProgressText').textContent = 'Question ' + (quiz.i + 1) + ' of ' + quiz.qs.length;
+    $('qRoundText').textContent = roundName(quiz.level);
     $('qScoreText').textContent = 'Score: ' + quiz.score;
     $('qBar').style.width = (quiz.i / quiz.qs.length * 100) + '%';
     $('qText').textContent = q.q;
@@ -758,6 +1234,7 @@
     var correct = idx === q.answer;
     if (correct) quiz.score++;
     quiz.results.push({ q: q, chosen: idx, correct: correct });
+    if (correct) soundCorrect(); else soundWrong();
     var buttons = $('qOptions').children;
     Array.prototype.forEach.call(buttons, function (b) { b.disabled = true; });
     function mark(b, ok) {
@@ -789,14 +1266,32 @@
 
   function showFinal() {
     quiz.finished = true;
-    var total = quiz.qs.length;
+    var total = quiz.qs.length, perfect = quiz.score === total, level = quiz.level, ml = maxLevel();
     var pct = Math.round(quiz.score / total * 100);
     $('rScore').textContent = quiz.score + ' / ' + total;
-    var msg = pct >= 90 ? 'Excellent work! (' + pct + '%)'
-            : pct >= 70 ? 'Good job! (' + pct + '%)'
-            : pct >= 50 ? 'Getting there - review the explanations below. (' + pct + '%)'
-            : 'Keep practising - you will improve fast. (' + pct + '%)';
-    $('rMsg').textContent = msg;
+    var next = $('rNext'), retry = $('rRetry');
+    next.hidden = true;
+    if (perfect) {
+      soundFanfare();
+      if (level < ml) {
+        setUnlocked(level + 1);
+        $('rTitle').textContent = roundName(level) + ' complete!';
+        $('rMsg').textContent = 'Perfect score! ' + roundName(level + 1) + ' is now unlocked.';
+        next.textContent = 'Start ' + roundName(level + 1);
+        next.hidden = false;
+        next.onclick = function () { startQuiz(level + 1); };
+      } else {
+        $('rTitle').textContent = 'You finished every round!';
+        $('rMsg').textContent = 'Perfect score in the hardest round. Amazing work! (100%)';
+      }
+      retry.textContent = 'Play this round again';
+    } else {
+      $('rTitle').textContent = 'Your result';
+      $('rMsg').textContent = (pct >= 70 ? 'Good job! ' : pct >= 50 ? 'Getting there. ' : 'Keep practising. ') + '(' + pct + '%) ' +
+        (level < ml && SITE.perfectScoreToUnlock !== false ? 'Get every question right to unlock ' + roundName(level + 1) + '.' : 'Review the explanations below.');
+      retry.textContent = 'Try again with new questions';
+    }
+    retry.onclick = function () { startQuiz(level); };
     var list = $('rReview');
     list.textContent = '';
     quiz.results.forEach(function (r, n) {
@@ -810,17 +1305,16 @@
     showQuizView('result');
   }
 
-  $('quizStartBtn').addEventListener('click', startQuiz);
   $('qNext').addEventListener('click', function () {
     if (quiz.i >= quiz.qs.length - 1) { showFinal(); }
     else { quiz.i++; showQuestion(); }
   });
-  $('rRetry').addEventListener('click', startQuiz);
+  $('rToRounds').addEventListener('click', resetQuizView);
   $('rToRunner').addEventListener('click', function () { setMode('runner'); });
 
-  /* ---------- Go ---------- */
-  setLanguage(lang, true);
-  setMode('runner');
+  /* ---------- Go: show the start screen ---------- */
+  $('welcome').hidden = false;
+  $('workspace').hidden = true;
 })();
 </script>
 </body>
