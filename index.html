@@ -29,12 +29,17 @@
     --out-bg: #12171f;
     --out-text: #e6edf3;
     --out-err: #ff8a80;
+    --out-muted: #8b97a8;
+    --out-line: #2f3a4a;
     --good-bg: #e6f6ec;
     --good-border: #2e9e5b;
     --good-text: #14633a;
     --bad-bg: #fdeaea;
     --bad-border: #d64545;
     --bad-text: #8f1f1f;
+    --band: rgba(255, 196, 0, 0.26);
+    --band-edge: #e0a800;
+    --band-err: rgba(214, 69, 69, 0.2);
     --radius: 12px;
     --tk-keyword: #8250df;
     --tk-type: #0b7285;
@@ -61,6 +66,9 @@
     --bad-bg: #3a1618;
     --bad-border: #ef6b6b;
     --bad-text: #ffb4b4;
+    --band: rgba(255, 196, 0, 0.2);
+    --band-edge: #ffc400;
+    --band-err: rgba(239, 107, 107, 0.25);
     --tk-keyword: #c4a7ff;
     --tk-type: #5fd7e8;
     --tk-function: #82b1ff;
@@ -78,74 +86,113 @@
     font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
     line-height: 1.5;
   }
-  .wrap { max-width: 1040px; margin: 0 auto; padding: 0 16px; }
+  .wrap { max-width: 1180px; margin: 0 auto; padding: 0 16px; }
   header.top { background: var(--surface); border-bottom: 1px solid var(--border); }
-  header.top .wrap { padding-top: 14px; padding-bottom: 14px; display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
-  h1 { margin: 0; font-size: 1.5rem; letter-spacing: -0.01em; }
-  #siteTagline { margin: 2px 0 0; color: var(--muted); font-size: 0.95rem; }
-  .top-controls { display: flex; gap: 8px; flex-wrap: wrap; }
+  header.top .wrap { padding-top: 10px; padding-bottom: 10px; display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+  h1 { margin: 0; font-size: 1.35rem; letter-spacing: -0.01em; line-height: 1.2; }
+  #siteTagline { margin: 0; color: var(--muted); font-size: 0.85rem; line-height: 1.3; }
+  .top-controls { display: flex; gap: 8px; }
+  @media (max-width: 640px) { #siteTagline { display: none; } header.top .wrap { padding-top: 8px; padding-bottom: 8px; } h1 { font-size: 1.2rem; } }
 
   .banner-error {
     margin: 24px auto; max-width: 720px; padding: 16px 18px; border-radius: var(--radius);
     background: var(--bad-bg); border: 1px solid var(--bad-border); color: var(--bad-text);
   }
 
-  main { padding-top: 20px; padding-bottom: 48px; }
-  button:focus-visible, textarea:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+  main { padding-top: 12px; padding-bottom: 28px; }
+  button:focus-visible, textarea:focus-visible, input:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
   .btn {
-    font: inherit; cursor: pointer; padding: 9px 18px; border-radius: 8px;
+    font: inherit; cursor: pointer; padding: 8px 16px; border-radius: 8px; white-space: nowrap;
     border: 1px solid var(--border); background: var(--surface); color: var(--text);
   }
-  .btn:hover { border-color: var(--accent); }
-  .btn.small { padding: 6px 12px; font-size: 0.88rem; }
+  .btn:hover:not(:disabled) { border-color: var(--accent); }
+  .btn.small { padding: 5px 11px; font-size: 0.86rem; }
   .btn.primary { background: var(--accent); color: var(--accent-text); border-color: var(--accent); font-weight: 600; }
-  .btn:disabled { opacity: 0.6; cursor: wait; }
+  .btn:disabled { opacity: 0.55; cursor: not-allowed; }
+  .btn.primary:disabled { cursor: wait; }
+
+  /* ---------- Symbol badges (our own designs, not official logos) ---------- */
+  .badge {
+    flex: none; display: inline-grid; place-items: center; width: 36px; height: 36px; border-radius: 10px;
+    color: #fff; font-weight: 800; font-size: 1.05rem; line-height: 1; overflow: hidden; user-select: none;
+    font-family: system-ui, "Segoe UI", "Segoe UI Emoji", "Apple Color Emoji", "Noto Color Emoji", sans-serif;
+  }
+  .badge.s2 { font-size: 0.86rem; }
+  .badge.s3 { font-size: 0.7rem; letter-spacing: -0.03em; }
+  .badge.sm { width: 22px; height: 22px; border-radius: 6px; font-size: 0.74rem; }
+  .badge.sm.s2 { font-size: 0.6rem; }
+  .badge.sm.s3 { font-size: 0.5rem; }
+  .badge img { width: 100%; height: 100%; object-fit: contain; background: #fff; }
 
   /* ---------- Start screen ---------- */
-  .welcome { text-align: center; padding: 24px 0 8px; }
-  .welcome h2 { margin: 0 0 6px; font-size: 1.6rem; letter-spacing: -0.01em; }
-  .welcome p { margin: 0 auto 26px; color: var(--muted); max-width: 520px; }
-  .lang-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; text-align: left; }
-  @media (min-width: 720px) { .lang-grid { grid-template-columns: repeat(3, 1fr); } }
+  .welcome { text-align: center; padding: 14px 0 8px; }
+  .welcome h2 { margin: 0 0 4px; font-size: 1.6rem; letter-spacing: -0.01em; }
+  .welcome p { margin: 0 auto 16px; color: var(--muted); max-width: 560px; }
+  .search-row { max-width: 460px; margin: 0 auto 18px; }
+  .search-row input {
+    width: 100%; font: inherit; padding: 10px 14px; border-radius: 999px; border: 1px solid var(--border);
+    background: var(--surface); color: var(--text);
+  }
+  .lang-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; text-align: left; }
+  @media (min-width: 720px) { .lang-grid { grid-template-columns: repeat(3, 1fr); gap: 12px; } }
+  @media (min-width: 1000px) { .lang-grid { grid-template-columns: repeat(4, 1fr); } }
   .lang-card {
-    font: inherit; color: inherit; cursor: pointer; text-align: left; display: flex; flex-direction: column; gap: 6px;
-    padding: 18px; border-radius: var(--radius); border: 2px solid var(--border); background: var(--surface);
-    transition: transform 0.12s, border-color 0.12s;
+    font: inherit; color: inherit; cursor: pointer; text-align: left; display: flex; align-items: flex-start; gap: 12px;
+    padding: 12px 14px; border-radius: var(--radius); border: 2px solid var(--border); background: var(--surface);
+    transition: transform 0.12s, border-color 0.12s; min-width: 0;
   }
   .lang-card:hover { border-color: var(--accent); transform: translateY(-2px); }
-  .lang-tag {
-    align-self: flex-start; min-width: 46px; height: 38px; padding: 0 10px; border-radius: 10px; display: grid; place-items: center;
-    background: var(--accent); color: var(--accent-text); font-weight: 800; font-size: 0.95rem;
-  }
-  .lang-name { font-size: 1.1rem; font-weight: 700; }
-  .lang-blurb { font-size: 0.85rem; color: var(--muted); }
+  .lc-main { display: flex; flex-direction: column; min-width: 0; flex: 1; }
+  .lang-name { font-size: 1.02rem; font-weight: 700; line-height: 1.25; }
+  .lang-blurb { font-size: 0.8rem; color: var(--muted); line-height: 1.3; }
+  .lc-tags { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 6px; }
+  .tag { font-size: 0.68rem; padding: 1px 7px; border-radius: 999px; border: 1px solid var(--border); color: var(--muted); white-space: nowrap; }
+  .tag.fast { color: var(--good-text); border-color: var(--good-border); background: var(--good-bg); }
+  .no-match { color: var(--muted); padding: 24px 0; }
+  .lang-card.unavail, .pill.unavail, .lang-card.nomatch { display: none; }
   @media (prefers-reduced-motion: reduce) { .lang-card { transition: none; } .lang-card:hover { transform: none; } }
 
-  .langs { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; align-items: center; }
+  /* One row of language buttons that scrolls sideways */
+  .langs { display: flex; flex-wrap: nowrap; gap: 8px; margin-bottom: 8px; align-items: center; overflow-x: auto; padding: 2px 2px 8px; scrollbar-width: thin; -webkit-overflow-scrolling: touch; }
   .pill {
-    font: inherit; cursor: pointer; padding: 7px 16px; border-radius: 999px;
+    font: inherit; cursor: pointer; padding: 4px 14px 4px 5px; border-radius: 999px; flex: none;
     border: 1px solid var(--border); background: var(--surface); color: var(--text);
+    display: inline-flex; align-items: center; gap: 7px; white-space: nowrap;
   }
   .pill:hover { border-color: var(--accent); }
   .pill[aria-pressed="true"] { background: var(--accent); color: var(--accent-text); border-color: var(--accent); font-weight: 600; }
-  .pill.home { border-style: dashed; color: var(--muted); }
+  .pill.home { border-style: dashed; color: var(--muted); padding: 7px 14px; }
 
-  .tabs { display: flex; gap: 4px; border-bottom: 1px solid var(--border); margin-bottom: 18px; }
+  .tabs { display: flex; gap: 4px; border-bottom: 1px solid var(--border); margin-bottom: 10px; }
   .tab {
     font: inherit; cursor: pointer; background: none; border: none; color: var(--muted);
-    padding: 10px 16px; border-bottom: 3px solid transparent; margin-bottom: -1px;
+    padding: 7px 16px; border-bottom: 3px solid transparent; margin-bottom: -1px;
   }
   .tab[aria-selected="true"] { color: var(--text); border-bottom-color: var(--accent); font-weight: 600; }
 
   /* ---------- Code runner ---------- */
-  .runner { display: grid; grid-template-columns: 1fr; gap: 16px; }
-  @media (min-width: 860px) { .runner { grid-template-columns: 1fr 1fr; } }
-  .panel { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; display: flex; flex-direction: column; min-width: 0; }
-  .panel-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 10px 14px; border-bottom: 1px solid var(--border); font-size: 0.85rem; color: var(--muted); }
+  .actionbar { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-bottom: 10px; }
+  .actionbar .btn { padding: 8px 15px; }
+  #status { font-size: 0.86rem; color: var(--muted); min-width: 0; }
+  #status.ok { color: var(--good-text); }
+  #status.bad { color: var(--bad-text); }
+  .actionbar .hint { margin-left: auto; color: var(--muted); font-size: 0.78rem; }
+  @media (max-width: 640px) { .actionbar { gap: 6px; } .actionbar .hint { display: none; } .actionbar .btn { padding: 7px 10px; font-size: 0.9rem; } }
+
+  .runner { display: grid; grid-template-columns: 1fr; gap: 10px; }
+  @media (min-width: 860px) {
+    .runner { grid-template-columns: 1fr 1fr; gap: 14px; height: clamp(320px, calc(100dvh - 282px), 760px); }
+  }
+  .panel { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; display: flex; flex-direction: column; min-width: 0; min-height: 0; }
+  .panel-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 6px 14px; border-bottom: 1px solid var(--border); font-size: 0.85rem; color: var(--muted); flex: none; }
   .panel-head strong { color: var(--text); }
 
   /* The editor is a transparent textarea laid over a coloured copy of the same text. */
-  .editor-wrap { position: relative; height: 360px; background: var(--editor-bg); }
+  .editor-wrap { position: relative; background: var(--editor-bg); flex: 1; min-height: 0; overflow: hidden; }
+  @media (max-width: 859px) {
+    .editor-wrap { flex: none; height: clamp(120px, 28dvh, 320px); }
+    .out-panel { height: clamp(170px, 31dvh, 340px); }
+  }
   .editor-wrap pre, .editor-wrap textarea {
     position: absolute; top: 0; right: 0; bottom: 0; left: 0; margin: 0; width: 100%; height: 100%;
     padding: 14px; border: 0; border-radius: 0;
@@ -162,30 +209,57 @@
   }
   .editor-wrap textarea::selection { background: var(--selection); }
   .editor-wrap textarea:focus-visible, textarea.stdin:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
+  .editor-wrap.debugging textarea { caret-color: transparent; cursor: default; }
+  /* current-line band: yellow while debugging, red for an error */
+  .band { position: absolute; left: 0; right: 0; height: 22px; pointer-events: none; background: var(--band); border-left: 3px solid var(--band-edge); }
+  .band.err { background: var(--band-err); border-left-color: var(--bad-border); }
   .tk-kw { color: var(--tk-keyword); }
-  .tk-type { color: var(--tk-type); }
+  .tk-type, .tk-var { color: var(--tk-type); }
   .tk-fn { color: var(--tk-function); }
   .tk-str { color: var(--tk-string); }
   .tk-num { color: var(--tk-number); }
   .tk-com { color: var(--tk-comment); }
   .tk-pre { color: var(--tk-preproc); }
 
-  textarea.stdin {
-    width: 100%; min-height: 70px; border: none; border-top: 1px solid var(--border); resize: vertical; padding: 12px 14px;
-    background: var(--editor-bg); color: var(--text);
-    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace; font-size: 14px; line-height: 1.5;
-  }
-  .toolbar { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; padding: 10px 14px; border-top: 1px solid var(--border); }
-  .toolbar .hint { color: var(--muted); font-size: 0.8rem; margin-left: auto; }
-  #outputBox { background: var(--out-bg); color: var(--out-text); min-height: 340px; padding: 14px; overflow: auto; flex: 1; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 0.9rem; }
+  .out-body { flex: 1; min-height: 0; display: flex; flex-direction: column; }
+  #outputBox { background: var(--out-bg); color: var(--out-text); flex: 1; min-height: 0; padding: 12px 14px; overflow: auto; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 0.9rem; }
   #outputBox pre { margin: 0 0 8px; white-space: pre-wrap; word-break: break-word; font: inherit; }
   #outputBox pre.err { color: var(--out-err); }
-  #outputBox .muted { color: #8b97a8; font-style: italic; }
+  #outputBox .muted { color: var(--out-muted); font-style: italic; }
   #outputBox table { border-collapse: collapse; margin: 0 0 12px; font-size: 0.88rem; }
-  #outputBox th, #outputBox td { border: 1px solid #2f3a4a; padding: 5px 10px; text-align: left; }
+  #outputBox th, #outputBox td { border: 1px solid var(--out-line); padding: 5px 10px; text-align: left; }
   #outputBox th { background: #1b2432; }
-  #outputBox .caption { color: #8b97a8; font-size: 0.8rem; margin: 0 0 14px; }
-  .note { margin: 10px 0 0; font-size: 0.85rem; color: var(--muted); }
+  #outputBox .caption { color: var(--out-muted); font-size: 0.8rem; margin: 0 0 14px; }
+  #outputBox .goto { font: inherit; background: none; border: none; padding: 0; color: #8fb4ff; text-decoration: underline; cursor: pointer; }
+  .stdin-wrap { flex: none; border-top: 1px solid var(--border); background: var(--editor-bg); }
+  .stdin-wrap label { display: block; padding: 4px 14px 0; font-size: 0.74rem; color: var(--muted); }
+  textarea.stdin {
+    display: block; width: 100%; height: 52px; border: none; resize: none; padding: 4px 14px 8px;
+    background: transparent; color: var(--text);
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 13.5px; line-height: 1.45;
+  }
+  .note { margin: 8px 0 0; font-size: 0.82rem; color: var(--muted); }
+
+  /* ---------- Debugger view ---------- */
+  #dbgView { flex: 1; min-height: 0; display: flex; flex-direction: column; background: var(--out-bg); color: var(--out-text); }
+  .dbg-bar { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; padding: 8px 10px 4px; }
+  .dbg-bar .btn { padding: 4px 10px; font-size: 0.84rem; background: #1b2432; color: var(--out-text); border-color: var(--out-line); }
+  .dbg-bar .btn:hover:not(:disabled) { border-color: #8fb4ff; }
+  #dbgPos { margin-left: auto; font-size: 0.8rem; color: var(--out-muted); white-space: nowrap; }
+  #dbgSlider { width: calc(100% - 20px); margin: 2px 10px 4px; accent-color: #8fb4ff; }
+  .dbg-scroll { flex: 1; min-height: 0; overflow: auto; padding: 0 12px 10px; font-size: 0.88rem; }
+  #dbgInfo { padding: 6px 10px; margin: 2px 0 8px; border-radius: 8px; background: #1b2432; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 0.84rem; white-space: pre-wrap; word-break: break-word; }
+  #dbgInfo.err { background: #3a1618; color: var(--out-err); }
+  #dbgInfo.ok { background: #123322; color: #9be8bd; }
+  .dbg-scroll h4 { margin: 10px 0 4px; font-size: 0.74rem; letter-spacing: 0.06em; text-transform: uppercase; color: var(--out-muted); }
+  #dbgVars { border-collapse: collapse; width: 100%; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 0.84rem; }
+  #dbgVars td { border: 1px solid var(--out-line); padding: 3px 8px; vertical-align: top; word-break: break-word; }
+  #dbgVars td:first-child { width: 32%; color: #8fb4ff; }
+  #dbgVars tr.chg td { background: rgba(255, 196, 0, 0.18); }
+  #dbgVars tr.chg td:last-child::after { content: "  \2190 changed"; color: #ffc400; font-size: 0.72rem; font-family: system-ui, sans-serif; }
+  #dbgStack { margin: 0; padding-left: 22px; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 0.84rem; }
+  #dbgOut { margin: 0; white-space: pre-wrap; word-break: break-word; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 0.86rem; background: #0000004d; padding: 6px 8px; border-radius: 6px; min-height: 1.6em; }
+  .dbg-empty { color: var(--out-muted); font-style: italic; }
 
   /* ---------- Quiz ---------- */
   .card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 24px; max-width: 760px; margin: 0 auto; }
@@ -239,7 +313,7 @@
   .review small { display: block; margin-top: 2px; opacity: 0.85; }
   .actions { display: flex; gap: 10px; flex-wrap: wrap; }
 
-  footer { text-align: center; color: var(--muted); font-size: 0.8rem; padding: 0 16px 28px; }
+  footer { text-align: center; color: var(--muted); font-size: 0.8rem; padding: 0 16px 20px; }
 </style>
 </head>
 <body>
@@ -275,7 +349,9 @@
   <section class="welcome" id="welcome">
     <h2 id="welcomeHeading">Choose a language to start</h2>
     <p id="welcomeSub"></p>
+    <div class="search-row"><input id="langSearch" type="search" placeholder="Search languages..." aria-label="Search languages" autocomplete="off"></div>
     <div class="lang-grid" id="langCards"></div>
+    <p class="no-match" id="noMatch" hidden>No language matches your search.</p>
   </section>
 
   <!-- ===================== MAIN SITE ===================== -->
@@ -289,25 +365,56 @@
 
     <!-- CODE RUNNER -->
     <section id="runnerPanel" aria-labelledby="tabRunner">
+      <div class="actionbar">
+        <button class="btn primary" id="runBtn" type="button">&#9654; Run</button>
+        <button class="btn" id="debugBtn" type="button">&#128030; Debug</button>
+        <button class="btn" id="resetCodeBtn" type="button">&#8634; Reset code</button>
+        <button class="btn" id="resetDbBtn" type="button" hidden>Reset sample database</button>
+        <span id="status" aria-live="polite"></span>
+        <span class="hint">Ctrl/Cmd + Enter to run</span>
+      </div>
+
       <div class="runner">
         <div class="panel">
           <div class="panel-head"><span><strong id="editorLang">Python</strong> editor</span></div>
           <div class="editor-wrap" id="editorWrap">
+            <div class="band" id="band" hidden></div>
             <pre class="hl" id="hl" aria-hidden="true"><code id="hlCode"></code></pre>
             <textarea id="editor" spellcheck="false" autocapitalize="off" autocomplete="off" autocorrect="off" aria-label="Code editor"></textarea>
           </div>
-          <textarea id="stdin" class="stdin" spellcheck="false" placeholder="Input for the program (optional) - one value per line" aria-label="Program input"></textarea>
-          <div class="toolbar">
-            <button class="btn primary" id="runBtn">&#9654; Run</button>
-            <button class="btn" id="resetCodeBtn">Reset code</button>
-            <button class="btn" id="resetDbBtn" hidden>Reset sample database</button>
-            <span class="hint">Ctrl/Cmd + Enter to run</span>
-          </div>
         </div>
 
-        <div class="panel">
-          <div class="panel-head"><strong>Output</strong><span id="status" aria-live="polite"></span></div>
-          <div id="outputBox" aria-live="polite"><span class="muted">Press Run to see the output here.</span></div>
+        <div class="panel out-panel">
+          <div class="panel-head"><strong id="outTitle">Output</strong></div>
+          <div class="out-body">
+            <div id="outputBox" aria-live="polite"><span class="muted">Press Run to see the output here.</span></div>
+
+            <div id="dbgView" hidden>
+              <div class="dbg-bar">
+                <button class="btn" id="dbgFirst" type="button" title="First step">&#9198;</button>
+                <button class="btn" id="dbgBack" type="button" title="Back (left arrow)">&#9664; Back</button>
+                <button class="btn" id="dbgNext" type="button" title="Next (right arrow)">Next &#9654;</button>
+                <button class="btn" id="dbgLast" type="button" title="Last step">&#9197;</button>
+                <button class="btn" id="dbgPlay" type="button">&#9654; Auto-play</button>
+                <button class="btn" id="dbgExit" type="button">Exit debug</button>
+                <span id="dbgPos"></span>
+              </div>
+              <input type="range" id="dbgSlider" min="0" max="0" value="0" aria-label="Step slider">
+              <div class="dbg-scroll">
+                <div id="dbgInfo"></div>
+                <h4>Variables</h4>
+                <table id="dbgVars"><tbody></tbody></table>
+                <div id="dbgStackWrap"><h4>Call stack</h4><ol id="dbgStack"></ol></div>
+                <h4>Printed so far</h4>
+                <pre id="dbgOut"></pre>
+              </div>
+            </div>
+
+            <div class="stdin-wrap" id="stdinWrap">
+              <label for="stdin">Input for the program (optional, one value per line)</label>
+              <textarea id="stdin" class="stdin" spellcheck="false" aria-label="Program input"></textarea>
+            </div>
+          </div>
         </div>
       </div>
       <p class="note" id="runnerNote" hidden></p>
@@ -352,6 +459,123 @@
 
 <script src="settings.js"></script>
 <script src="questions.js"></script>
+<script type="text/plain" id="pyTracerSrc">
+import sys, json, builtins, traceback, types
+
+def __cl_debug(code, stdin_text, max_steps):
+    steps = []
+    out = []
+    lines = stdin_text.split('\n') if stdin_text else []
+    pos = [0]
+
+    class Stop(BaseException):
+        pass
+
+    def emit(s):
+        out.append([len(steps), s])
+
+    class Writer:
+        def write(self, s):
+            if s:
+                emit(str(s))
+            return len(s) if s else 0
+        def flush(self):
+            pass
+        def isatty(self):
+            return False
+
+    def fake_input(prompt=''):
+        if prompt:
+            emit(str(prompt))
+        if pos[0] < len(lines):
+            v = lines[pos[0]]
+            pos[0] += 1
+            emit(v + '\n')
+            return v
+        raise EOFError('EOF when reading a line (type the input in the Input box)')
+
+    def short(v):
+        try:
+            if isinstance(v, types.FunctionType):
+                r = '<function ' + v.__name__ + '>'
+            elif isinstance(v, type):
+                r = '<class ' + v.__name__ + '>'
+            else:
+                r = repr(v)
+        except Exception:
+            r = '<unprintable>'
+        if len(r) > 80:
+            r = r[:77] + '...'
+        return r
+
+    def snap(frame):
+        d = {}
+        for k, v in list(frame.f_locals.items()):
+            if k.startswith('__') or isinstance(v, types.ModuleType):
+                continue
+            d[k] = short(v)
+            if len(d) >= 40:
+                break
+        return d
+
+    def stack_of(frame):
+        names = []
+        f = frame
+        while f is not None:
+            if f.f_code.co_filename == '<code>':
+                n = f.f_code.co_name
+                names.append('main program' if n == '<module>' else n)
+            f = f.f_back
+        names.reverse()
+        return names
+
+    def tracer(frame, event, arg):
+        if frame.f_code.co_filename != '<code>':
+            return None
+        if event == 'line' or event == 'return':
+            if len(steps) >= max_steps:
+                raise Stop()
+            st = {'l': frame.f_lineno, 'v': snap(frame), 'k': stack_of(frame)}
+            if event == 'return':
+                st['ev'] = 'return'
+                st['ret'] = short(arg)
+            steps.append(st)
+        return tracer
+
+    g = {'__name__': '__main__', '__builtins__': builtins}
+    old_out, old_err, old_input = sys.stdout, sys.stderr, builtins.input
+    result = {'steps': steps, 'out': out, 'error': None, 'errline': None, 'truncated': False}
+    try:
+        try:
+            co = compile(code, '<code>', 'exec')
+        except SyntaxError as e:
+            result['error'] = 'SyntaxError: ' + str(e.msg)
+            result['errline'] = e.lineno
+            return json.dumps(result)
+        sys.stdout = Writer()
+        sys.stderr = Writer()
+        builtins.input = fake_input
+        sys.settrace(tracer)
+        try:
+            exec(co, g)
+        except Stop:
+            result['truncated'] = True
+        except SystemExit:
+            pass
+        except BaseException as e:
+            sys.settrace(None)
+            result['error'] = ''.join(traceback.format_exception_only(type(e), e)).strip()
+            tb = e.__traceback__
+            while tb is not None:
+                if tb.tb_frame.f_code.co_filename == '<code>':
+                    result['errline'] = tb.tb_lineno
+                tb = tb.tb_next
+        finally:
+            sys.settrace(None)
+    finally:
+        sys.stdout, sys.stderr, builtins.input = old_out, old_err, old_input
+    return json.dumps(result)
+</script>
 <script>
 (function () {
   'use strict';
@@ -371,14 +595,16 @@
     return;
   }
 
-  /* Optional settings with safe defaults (so an older settings.js still works). */
   var EDIT = (typeof EDITOR !== 'undefined' && EDITOR) ? EDITOR : { autoCloseBrackets: true, autoIndent: true };
   var SND = (typeof SOUNDS !== 'undefined' && SOUNDS) ? SOUNDS : { enabledByDefault: true, vibrateOnWrong: true };
   var COLORS = (typeof SYNTAX_COLORS !== 'undefined' && SYNTAX_COLORS) ? SYNTAX_COLORS : null;
   var UNIT = new Array((SITE.indentSize || 4) + 1).join(' ');
+  var MAX_STEPS = SITE.maxDebugSteps || 2000;
 
   var PYODIDE_BASE = 'https://cdn.jsdelivr.net/pyodide/v0.26.4/full/';
   var SQLJS_BASE = 'https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.10.3/';
+  var ACORN_URL = 'https://cdn.jsdelivr.net/npm/acorn@8.12.1/dist/acorn.js';
+  var PY_DEBUG_SRC = $('pyTracerSrc').textContent;
 
   /* ---------- Small helpers ---------- */
   function store(key, value) {
@@ -436,7 +662,7 @@
   $('themeBtn').addEventListener('click', function () { applyTheme(theme === 'dark' ? 'light' : 'dark'); });
   applyTheme(theme);
 
-  /* ---------- Sounds (generated by the browser, no audio files) ---------- */
+  /* ---------- Sounds ---------- */
   var soundOn = store('sound') === null ? SND.enabledByDefault !== false : store('sound') === 'on';
   var audioCtx = null;
   function updateSoundBtn() {
@@ -449,7 +675,6 @@
     if (soundOn) playTones([[880, 0, 0.1, 'sine', 0.08]]);
   });
   updateSoundBtn();
-
   function getAudio() {
     if (!audioCtx) {
       var AC = window.AudioContext || window.webkitAudioContext;
@@ -459,7 +684,6 @@
     if (audioCtx.state === 'suspended') { try { audioCtx.resume(); } catch (e) {} }
     return audioCtx;
   }
-  /* notes: [frequency Hz, start seconds, length seconds, wave type, volume] */
   function playTones(notes) {
     if (!soundOn) return;
     var ctx = getAudio();
@@ -485,64 +709,130 @@
     playTones([[523, 0, 0.14, 'triangle', 0.16], [659, 0.14, 0.14, 'triangle', 0.16], [784, 0.28, 0.14, 'triangle', 0.16], [1047, 0.42, 0.4, 'triangle', 0.16]]);
   }
 
-  /* ---------- Syntax colouring ---------- */
+  /* ---------- Syntax colouring (one regular expression per language) ---------- */
   function words(s) { var o = {}; s.split(/\s+/).forEach(function (w) { if (w) o[w] = true; }); return o; }
-  var SYNTAX = {
-    c: {
-      line: '//', block: true, preproc: true, upperType: false,
-      kw: words('auto break case const continue default do else enum extern for goto if inline register restrict return sizeof static struct switch typedef union volatile while'),
-      types: words('int char short long float double void signed unsigned size_t FILE bool _Bool'),
-      consts: words('NULL true false EOF')
-    },
-    cpp: {
-      line: '//', block: true, preproc: true, upperType: true,
-      kw: words('alignas auto break case catch class const constexpr continue default delete do else enum explicit export extern final for friend goto if inline mutable namespace new noexcept operator override private protected public register return sizeof static static_cast dynamic_cast const_cast reinterpret_cast struct switch template this throw try typedef typename union using virtual volatile while'),
-      types: words('int char short long float double void signed unsigned bool string vector map set unordered_map unordered_set pair array deque list stack queue size_t cout cin cerr endl std wchar_t auto'),
-      consts: words('true false nullptr NULL')
-    },
-    python: {
-      line: '#', block: false, triple: true, upperType: true,
-      kw: words('and as assert async await break class continue def del elif else except finally for from global if import in is lambda nonlocal not or pass raise return try while with yield match case'),
-      types: words('int str float bool list dict set tuple bytes object type range'),
-      consts: words('True False None')
-    },
-    java: {
-      line: '//', block: true, upperType: true,
-      kw: words('abstract assert break case catch class const continue default do else enum extends final finally for goto if implements import instanceof interface native new package private protected public return static strictfp super switch synchronized this throw throws transient try volatile while var record'),
-      types: words('int long short byte float double char boolean void String Integer Double Boolean Character Object List ArrayList Map HashMap Set HashSet Math System Scanner'),
-      consts: words('true false null')
-    },
-    javascript: {
-      line: '//', block: true, backtick: true, upperType: true,
-      kw: words('async await break case catch class const continue debugger default delete do else export extends finally for function if import in instanceof let new of return static super switch this throw try typeof var void while with yield get set'),
-      types: words('Array Object String Number Boolean Map Set Promise Math JSON Date RegExp Symbol Error console document window'),
-      consts: words('true false null undefined NaN Infinity')
-    },
-    sql: {
-      line: '--', block: true, ci: true, upperType: false,
-      kw: words('select from where and or not in is null like between exists distinct group by having order asc desc limit offset join inner left right full outer cross on as union all insert into values update set delete create table drop alter add column primary key foreign references default unique index view case when then else end with limit begin commit rollback transaction check constraint autoincrement'),
-      types: words('integer int text real blob numeric varchar char date datetime boolean float double decimal'),
-      consts: words('null true false')
-    }
-  };
-  function escRe(s) { return s.replace(/[.*+?^${}()|[\]\\\/]/g, '\\$&'); }
+  function escRe(s) { return s.replace(/[.*+?^${}()|[\]\\\/\-]/g, '\\$&'); }
 
-  /* Build one regular expression per language; each group is one kind of token. */
+  var CBLOCK = [['/*', '*/']];
+  var SYNTAX = {
+    c: { line: ['//'], block: CBLOCK, preproc: true, upperType: false,
+      kw: 'auto break case const continue default do else enum extern for goto if inline register restrict return sizeof static struct switch typedef union volatile while',
+      types: 'int char short long float double void signed unsigned size_t FILE bool _Bool', consts: 'NULL true false EOF', builtins: 'printf scanf puts malloc free' },
+    cpp: { line: ['//'], block: CBLOCK, preproc: true, upperType: true,
+      kw: 'alignas auto break case catch class const constexpr continue default delete do else enum explicit export extern final for friend goto if inline mutable namespace new noexcept operator override private protected public register return sizeof static static_cast dynamic_cast const_cast reinterpret_cast struct switch template this throw try typedef typename union using virtual volatile while',
+      types: 'int char short long float double void signed unsigned bool string vector map set unordered_map unordered_set pair array deque list stack queue size_t cout cin cerr endl std wchar_t', consts: 'true false nullptr NULL' },
+    python: { line: ['#'], triple: true, upperType: true, at: true,
+      kw: 'and as assert async await break class continue def del elif else except finally for from global if import in is lambda nonlocal not or pass raise return try while with yield match case',
+      types: 'int str float bool list dict set tuple bytes object type range', consts: 'True False None', builtins: 'print input len range open' },
+    java: { line: ['//'], block: CBLOCK, upperType: true, at: true,
+      kw: 'abstract assert break case catch class const continue default do else enum extends final finally for goto if implements import instanceof interface native new package private protected public return static strictfp super switch synchronized this throw throws transient try volatile while var record',
+      types: 'int long short byte float double char boolean void String Integer Double Boolean Character Object List ArrayList Map HashMap Set HashSet Math System Scanner', consts: 'true false null' },
+    javascript: { line: ['//'], block: CBLOCK, backtick: true, upperType: true,
+      kw: 'async await break case catch class const continue debugger default delete do else export extends finally for function if import in instanceof let new of return static super switch this throw try typeof var void while with yield get set',
+      types: 'Array Object String Number Boolean Map Set Promise Math JSON Date RegExp Symbol Error console document window', consts: 'true false null undefined NaN Infinity' },
+    typescript: { line: ['//'], block: CBLOCK, backtick: true, upperType: true, at: true,
+      kw: 'abstract any as async await break case catch class const continue declare default delete do else enum export extends finally for from function get if implements import in instanceof interface is keyof let module namespace new of private protected public readonly return set static super switch this throw try type typeof var void while yield',
+      types: 'string number boolean any unknown never void object symbol bigint Array Map Set Promise Record Partial Date Error console', consts: 'true false null undefined NaN Infinity' },
+    sql: { line: ['--'], block: CBLOCK, ci: true,
+      kw: 'select from where and or not in is null like between exists distinct group by having order asc desc limit offset join inner left right full outer cross on as union all insert into values update set delete create table drop alter add column primary key foreign references default unique index view case when then else end with begin commit rollback transaction check constraint autoincrement',
+      types: 'integer int text real blob numeric varchar char date datetime boolean float double decimal', consts: 'null true false', builtins: 'count sum avg min max round upper lower length' },
+    csharp: { line: ['//'], block: CBLOCK, upperType: true, preproc: true, ppchar: '#',
+      kw: 'abstract as async await base break case catch checked class const continue default delegate do else enum event explicit extern finally fixed for foreach goto if implicit in interface internal is lock namespace new operator out override params private protected public readonly ref return sealed sizeof stackalloc static struct switch this throw try typeof unchecked unsafe using var virtual void volatile while yield record get set',
+      types: 'int long short byte sbyte uint ulong ushort float double decimal char bool string object void String Console Math List Dictionary', consts: 'true false null' },
+    go: { line: ['//'], block: CBLOCK, backtick: true, upperType: false,
+      kw: 'break case chan const continue default defer else fallthrough for func go goto if import interface map package range return select struct switch type var',
+      types: 'int int8 int16 int32 int64 uint uint8 uint16 uint32 uint64 float32 float64 string bool byte rune error any', consts: 'true false nil iota', builtins: 'make len cap append copy delete panic recover new println print' },
+    rust: { line: ['//'], block: CBLOCK, tick: true, macros: true, upperType: true, at: true,
+      kw: 'as async await break const continue crate dyn else enum extern fn for if impl in let loop match mod move mut pub ref return self Self static struct super trait type unsafe use where while',
+      types: 'i8 i16 i32 i64 i128 isize u8 u16 u32 u64 u128 usize f32 f64 bool char str String Vec Option Result Box HashMap', consts: 'true false None Some Ok Err' },
+    php: { line: ['//', '#'], block: CBLOCK, php: true, vars: '\\$[A-Za-z_]\\w*', upperType: true,
+      kw: 'abstract and array as break callable case catch class clone const continue declare default do echo else elseif empty enddeclare endfor endforeach endif endswitch endwhile extends final finally fn for foreach function global goto if implements include include_once instanceof insteadof interface isset list namespace new or print private protected public require require_once return static switch throw trait try unset use var while xor yield',
+      types: 'int float string bool array object mixed void null self parent', consts: 'true false null TRUE FALSE NULL', ci: true },
+    ruby: { line: ['#'], vars: '[@$]{1,2}[A-Za-z_]\\w*', idChars: '?!', sym: true, upperType: true,
+      kw: 'BEGIN END alias and begin break case class def defined? do else elsif end ensure for if in module next not or redo rescue retry return self super then undef unless until when while yield',
+      types: 'String Integer Float Array Hash Symbol Object Kernel Math', consts: 'true false nil', builtins: 'puts print p require gets attr_accessor attr_reader attr_writer' },
+    swift: { line: ['//'], block: CBLOCK, upperType: true, at: true,
+      kw: 'actor as associatedtype async await break case catch class continue default defer deinit do else enum extension fallthrough fileprivate for func guard if import in indirect infix init inout internal is let mutating nonmutating open operator override postfix precedence prefix private protocol public repeat rethrows return self Self static struct subscript super switch throw throws try typealias var where while',
+      types: 'Int Int8 Int16 Int32 Int64 UInt Double Float String Bool Character Array Dictionary Set Optional Any', consts: 'true false nil', builtins: 'print' },
+    kotlin: { line: ['//'], block: CBLOCK, upperType: true, at: true,
+      kw: 'abstract annotation as break by catch class companion const constructor continue crossinline data do else enum expect external final finally for fun get if import in infix init inline inner interface internal is lateinit noinline object open operator out override package private protected public reified return sealed set super suspend this throw try typealias val var vararg when where while',
+      types: 'Int Long Short Byte Float Double Char Boolean String Unit Any Nothing List MutableList Map Set Array', consts: 'true false null', builtins: 'println print readLine' },
+    r: { line: ['#'], upperType: false, idChars: '.',
+      kw: 'function if else for while repeat break next return in', types: '', consts: 'TRUE FALSE NULL NA NA_integer_ NA_real_ NA_character_ Inf NaN', builtins: 'cat print paste paste0 c length sum mean seq rep' },
+    dart: { line: ['//'], block: CBLOCK, upperType: true, at: true,
+      kw: 'abstract as assert async await break case catch class const continue covariant default deferred do dynamic else enum export extends extension external factory final finally for Function get hide if implements import in interface is late library mixin new on operator part required rethrow return set show static super switch sync this throw try typedef var void while with yield',
+      types: 'int double num String bool List Map Set Object dynamic Future Stream Iterable', consts: 'true false null', builtins: 'print' },
+    scala: { line: ['//'], block: CBLOCK, upperType: true, at: true,
+      kw: 'abstract case catch class def do else extends false final finally for forSome if implicit import lazy match new null object override package private protected return sealed super this throw trait try true type val var while with yield given using enum',
+      types: 'Int Long Short Byte Float Double Char Boolean String Unit Any Nothing List Map Set Array Option Seq', consts: 'true false null', builtins: 'println print' },
+    perl: { line: ['#'], vars: '[$@%][A-Za-z_]\\w*', upperType: false,
+      kw: 'and cmp continue do else elsif eq exists for foreach ge gt if last le lt my ne next no not or our package redo require return sub unless until use while xor local',
+      types: '', consts: '', builtins: 'print printf say push pop shift unshift keys values scalar die open close' },
+    lua: { line: ['--'], block: [['--[[', ']]']], upperType: false,
+      kw: 'and break do else elseif end for function goto if in local not or repeat return then until while', types: '', consts: 'true false nil', builtins: 'print io require pairs ipairs tostring tonumber' },
+    haskell: { line: ['--'], block: [['{-', '-}']], hsChar: true, idChars: "'", upperType: true,
+      kw: 'case class data default deriving do else foreign if import in infix infixl infixr instance let module newtype of then type where',
+      types: 'Int Integer Float Double Char String Bool IO Maybe Either Ordering', consts: 'True False Nothing Just Left Right', builtins: 'putStrLn putStr print show map filter foldr foldl return' },
+    bash: { line: ['#'], vars: '\\$\\{[^}\\n]*\\}?|\\$(?:[A-Za-z_]\\w*|[0-9#?@*!$])', upperType: false,
+      kw: 'if then else elif fi for while until do done case esac in function select time', types: '', consts: 'true false',
+      builtins: 'echo printf read cd export local return exit test source alias unset shift declare' },
+    julia: { line: ['#'], block: [['#=', '=#']], triple: 'dq', idChars: '!', juliaChar: true, at: true, upperType: true,
+      kw: 'abstract baremodule begin break catch const continue do else elseif end export finally for function global if import in isa let local macro module mutable primitive quote return struct try using where while',
+      types: 'Int Int8 Int16 Int32 Int64 UInt Float32 Float64 Bool Char String Any Nothing Vector Array Dict Set', consts: 'true false nothing missing', builtins: 'println print' },
+    elixir: { line: ['#'], triple: 'dq', idChars: '?!', sym: true, upperType: true,
+      kw: 'after alias and case catch cond def defmacro defmodule defp defstruct do else end fn for if import in not or quote raise receive require rescue try unless unquote use when with',
+      types: '', consts: 'true false nil', builtins: 'IO puts inspect' },
+    pascal: { line: ['//'], block: [['{', '}'], ['(*', '*)']], ci: true, pascalStr: true,
+      kw: 'and array as begin case const constructor destructor div do downto else end except exports file finally for function goto if implementation in inherited inline interface label mod nil not object of on or packed procedure program property raise record repeat set shl shr then to try type unit until uses var while with xor',
+      types: 'integer real boolean char string byte word longint shortint double single text', consts: 'true false nil', builtins: 'writeln write readln read' },
+    ocaml: { line: [], block: [['(*', '*)']], tick: true, idChars: "'", upperType: true,
+      kw: 'and as assert begin class constraint do done downto else end exception external for fun function functor if in include inherit initializer lazy let match method module mutable new object of open or private rec sig struct then to try type val virtual when while with',
+      types: 'int float string bool char unit list array option ref', consts: 'true false None Some', builtins: 'print_endline print_string print_int Printf' },
+    lisp: { line: [';'], block: [['#|', '|#']], idChars: '\\-*+?!<>=/:%', lispFn: true, upperType: false, ci: true, sqStr: false,
+      kw: 'defun defvar defparameter defmacro defstruct defclass defmethod defgeneric let let* lambda if cond when unless progn setf setq loop do dolist dotimes and or not case quote function in-package',
+      types: '', consts: 't nil', builtins: 'format print princ car cdr cons list' },
+    d: { line: ['//'], block: [['/*', '*/'], ['/+', '+/']], backtick: true, upperType: true,
+      kw: 'abstract alias align asm assert auto body bool break byte case cast catch class const continue debug default delegate delete deprecated do else enum export extern final finally for foreach function goto if immutable import in inout interface invariant is lazy mixin module new nothrow out override package pragma private protected public pure ref return scope shared static struct super switch synchronized template this throw try typeid typeof union unittest version while with',
+      types: 'int uint long ulong short ushort byte ubyte float double real char string dchar wchar void bool size_t', consts: 'true false null', builtins: 'writeln writefln write' },
+    nim: { line: ['#'], block: [['#[', ']#']], triple: 'dq', hsChar: true, upperType: true,
+      kw: 'addr and as asm bind block break case cast concept const continue converter defer discard distinct div do elif else end enum except export finally for from func if import in include interface is isnot iterator let macro method mixin mod nil not notin object of or out proc ptr raise ref return shl shr static template try tuple type using var when while xor yield',
+      types: 'int int8 int16 int32 int64 uint float float32 float64 bool char string seq array set', consts: 'true false nil', builtins: 'echo' },
+    crystal: { line: ['#'], vars: '@{1,2}[A-Za-z_]\\w*', idChars: '?!', sym: true, upperType: true,
+      kw: 'abstract alias annotation as asm begin break case class def do else elsif end ensure enum extend for fun if in include instance_sizeof is_a? lib macro module next nil? of out pointerof private protected require rescue responds_to? return select self sizeof struct super then type typeof union uninitialized unless until verbatim when while with yield',
+      types: 'String Int32 Int64 Float64 Bool Char Array Hash Symbol Nil', consts: 'true false nil', builtins: 'puts print p gets' },
+    groovy: { line: ['//'], block: CBLOCK, triple: 'both', upperType: true, at: true,
+      kw: 'abstract as assert break case catch class const continue def default do else enum extends final finally for goto if implements import in instanceof interface native new package private protected public return static strictfp super switch synchronized this threadsafe throw throws transient try volatile while',
+      types: 'int long short byte float double char boolean void String Integer List Map Set Object', consts: 'true false null', builtins: 'println print' }
+  };
+
   Object.keys(SYNTAX).forEach(function (k) {
     var cfg = SYNTAX[k], p = [], cls = [];
     function add(c, s) { cls.push(c); p.push('(' + s + ')'); }
-    if (cfg.block) add('com', '\\/\\*[\\s\\S]*?(?:\\*\\/|(?![\\s\\S]))');
-    add('com', escRe(cfg.line) + '[^\\n]*');
+    cfg.kw = words(cfg.kw); cfg.types = words(cfg.types || ''); cfg.consts = words(cfg.consts || ''); cfg.bi = words(cfg.builtins || '');
+    (cfg.block || []).forEach(function (b) { add('com', escRe(b[0]) + '[\\s\\S]*?(?:' + escRe(b[1]) + '|(?![\\s\\S]))'); });
+    (cfg.line || []).forEach(function (l) { add('com', escRe(l) + '[^\\n]*'); });
+    if (cfg.php) add('pre', '<\\?php|<\\?=|\\?>');
     if (cfg.preproc) {
-      add('pre', '^[ \\t]*#[ \\t]*include[ \\t]*(?:<[^>\\n]*>?|"[^"\\n]*"?)');
-      add('pre', '^[ \\t]*#[ \\t]*[A-Za-z_]+');
+      if (k === 'csharp') add('pre', '^[ \\t]*#[ \\t]*[A-Za-z_]+');
+      else { add('pre', '^[ \\t]*#[ \\t]*include[ \\t]*(?:<[^>\\n]*>?|"[^"\\n]*"?)'); add('pre', '^[ \\t]*#[ \\t]*[A-Za-z_]+'); }
     }
-    if (cfg.triple) add('str', '"""[\\s\\S]*?(?:"""|(?![\\s\\S]))|\'\'\'[\\s\\S]*?(?:\'\'\'|(?![\\s\\S]))');
+    if (cfg.at) add('pre', '@[A-Za-z_][\\w.]*');
+    if (cfg.vars) add('var', cfg.vars);
+    if (cfg.triple === true) add('str', '"""[\\s\\S]*?(?:"""|(?![\\s\\S]))|\'\'\'[\\s\\S]*?(?:\'\'\'|(?![\\s\\S]))');
+    else if (cfg.triple === 'dq') add('str', '"""[\\s\\S]*?(?:"""|(?![\\s\\S]))');
+    else if (cfg.triple === 'both') add('str', '"""[\\s\\S]*?(?:"""|(?![\\s\\S]))|\'\'\'[\\s\\S]*?(?:\'\'\'|(?![\\s\\S]))');
     add('str', '"(?:\\\\.|[^"\\\\\\n])*"?');
-    add('str', "'(?:\\\\.|[^'\\\\\\n])*'?");
+    if (cfg.pascalStr) add('str', "'(?:[^'\\n]|'')*'?");
+    else if (cfg.tick || cfg.hsChar || cfg.juliaChar) {
+      add('str', "'(?:\\\\(?:x[0-9a-fA-F]{1,2}|u\\{[0-9a-fA-F]+\\}|.)|[^'\\\\\\n])'");
+      if (cfg.tick) add('type', "'[A-Za-z_]\\w*");
+    }
+    else if (cfg.sqStr !== false) add('str', "'(?:\\\\.|[^'\\\\\\n])*'?");
     if (cfg.backtick) add('str', '`(?:\\\\[\\s\\S]|[^`\\\\])*`?');
-    add('num', '\\b(?:0[xX][0-9a-fA-F]+|\\d+\\.?\\d*(?:[eE][+-]?\\d+)?)[uUlLfF]*\\b');
-    add('id', '[A-Za-z_$][\\w$]*');
+    if (cfg.sym) add('num', '(?::[A-Za-z_]\\w*[?!]?)');
+    add('num', '\\b(?:0[xX][0-9a-fA-F_]+|0[bB][01_]+|\\d[\\d_]*\\.?[\\d_]*(?:[eE][+-]?\\d+)?)[uUlLfFnN]*\\b');
+    if (cfg.macros) add('fn', '[A-Za-z_]\\w*!(?=\\s*[(\\[{])');
+    add('id', '[A-Za-z_$][\\w$' + (cfg.idChars || '') + ']*');
     cfg.cls = cls;
     cfg.source = p.join('|');
   });
@@ -560,17 +850,17 @@
       if (c === 'id') {
         var key = cfg.ci ? text.toLowerCase() : text;
         if (cfg.kw[key]) c = 'kw';
-        else if (cfg.consts[key]) c = 'num';
-        else if (cfg.types[text]) c = 'type';
+        else if (cfg.consts[key] || (cfg.ci && cfg.consts[key])) c = 'num';
+        else if (cfg.types[text] || (cfg.ci && cfg.types[key])) c = 'type';
+        else if (cfg.bi[key]) c = 'fn';
         else {
           var j = m.index + text.length;
           while (j < src.length && (src.charAt(j) === ' ' || src.charAt(j) === '\t')) j++;
           if (src.charAt(j) === '(') c = 'fn';
+          else if (cfg.lispFn && src.charAt(m.index - 1) === '(') c = 'fn';
           else if (cfg.upperType && /^[A-Z][A-Za-z0-9_]*[a-z]/.test(text)) c = 'type';
-          else if (cfg.ci && cfg.types[key]) c = 'type';
           else c = null;
         }
-        if (cfg.ci && !c && cfg.types[key]) c = 'type';
       }
       out += c ? '<span class="tk-' + c + '">' + esc(text) + '</span>' : esc(text);
       last = m.index + m[0].length;
@@ -578,21 +868,82 @@
     return out + esc(src.slice(last));
   }
 
+  /* Indentation rules for languages that use words (end, fi, done ...) instead of braces.
+     open  = this line starts a block, so the next line is indented.
+     close = this line ends/changes a block, so it moves one level left. */
+  var INDENT = {
+    ruby:    { open: /^\s*(def|class|module|if|unless|while|until|for|case|begin|elsif|else|when|rescue|ensure|in)\b|\bdo(\s*\|[^|]*\|)?\s*$/, close: /^\s*(end|else|elsif|when|rescue|ensure)\b/, noOpen: /\bend\s*$/ },
+    crystal: { open: /^\s*(def|class|module|struct|enum|lib|macro|if|unless|while|until|for|case|begin|elsif|else|when|rescue|ensure)\b|\bdo(\s*\|[^|]*\|)?\s*$/, close: /^\s*(end|else|elsif|when|rescue|ensure)\b/, noOpen: /\bend\s*$/ },
+    lua:     { open: /\b(then|do|repeat)\s*$|^\s*(else|repeat)\s*$|\bfunction\b[^)]*\)\s*$/, close: /^\s*(end|else|elseif|until)\b/ },
+    bash:    { open: /(\bthen|\bdo)\s*$|^\s*else\s*$/, close: /^\s*(fi|done|esac|else|elif)\b/ },
+    pascal:  { open: /\b(begin|repeat|record)\s*$/i, close: /^\s*(end|until)\b/i },
+    elixir:  { open: /\bdo\s*$|\bfn\b.*->\s*$|^\s*(else|rescue|after|catch)\s*$/, close: /^\s*(end|else|rescue|after|catch)\b/ },
+    julia:   { open: /^\s*(function|if|for|while|begin|let|struct|mutable struct|module|try|macro|elseif|else|catch|finally|quote)\b|\bdo\s*$/, close: /^\s*(end|else|elseif|catch|finally)\b/, noOpen: /\bend\s*$/ },
+    haskell: { open: /(\bwhere|\bdo|\bof|\bthen|\belse|=)\s*$/ },
+    ocaml:   { open: /(\bbegin|\bthen|\belse|\bdo|\bstruct|\bsig|=|->)\s*$/, close: /^\s*(end|done)\b/ },
+    nim:     { open: /[:=]\s*$/ },
+    lisp:    { balance: true }
+  };
+  var NO_SQ_PAIR = { rust: true, ocaml: true, lisp: true, haskell: true };
+  var NO_BT_PAIR = { python: true, java: true, c: true, cpp: true, csharp: true, rust: true, sql: true, ruby: false };
+
   /* ---------- Elements and state ---------- */
   var langKeys = Object.keys(LANGUAGES);
-  var lang = null;
+  var lang = null, mode = 'runner';
   var codeMem = {};            /* code typed this visit, kept only in memory: a refresh brings back the welcome program */
-  var editor = $('editor'), hl = $('hl'), hlCode = $('hlCode');
-  var stdinBox = $('stdin'), outputBox = $('outputBox'), statusEl = $('status'), runBtn = $('runBtn');
-  var running = false;
-  var quiz = null;
+  var editor = $('editor'), hl = $('hl'), hlCode = $('hlCode'), band = $('band'), editorWrap = $('editorWrap');
+  var stdinBox = $('stdin'), stdinWrap = $('stdinWrap'), outputBox = $('outputBox'), statusEl = $('status');
+  var runBtn = $('runBtn'), debugBtn = $('debugBtn');
+  var running = false, quiz = null, dbg = null;
+  var cards = {}, pills = {};
+  function noop() {}
+  function names(L) { return L.wandbox || (L.wandboxLang ? [L.wandboxLang] : [L.label]); }
+  function hasQuiz(k) { return !!(QUIZ_QUESTIONS[k] && QUIZ_QUESTIONS[k].length); }
 
   function renderHL() {
     hlCode.innerHTML = highlight(editor.value, lang) + '\n';
     hl.scrollTop = editor.scrollTop; hl.scrollLeft = editor.scrollLeft;
   }
-  editor.addEventListener('scroll', function () { hl.scrollTop = editor.scrollTop; hl.scrollLeft = editor.scrollLeft; });
-  editor.addEventListener('input', function () { if (lang) codeMem[lang] = editor.value; renderHL(); });
+
+  /* ---------- Line band (current debug line / error line) ---------- */
+  var bandLine = 0;
+  function positionBand() {
+    if (!bandLine) { band.hidden = true; return; }
+    band.hidden = false;
+    band.style.top = (14 + (bandLine - 1) * 22 - editor.scrollTop) + 'px';
+  }
+  function showBand(line, kind) {
+    bandLine = line || 0;
+    band.className = 'band' + (kind === 'err' ? ' err' : '');
+    positionBand();
+  }
+  function clearBand() { bandLine = 0; positionBand(); }
+  function scrollToLine(line) {
+    var y = 14 + (line - 1) * 22, h = editor.clientHeight;
+    if (y < editor.scrollTop + 4 || y + 22 > editor.scrollTop + h - 4) editor.scrollTop = Math.max(0, y - Math.round(h / 2));
+    positionBand();
+  }
+  editor.addEventListener('scroll', function () { hl.scrollTop = editor.scrollTop; hl.scrollLeft = editor.scrollLeft; positionBand(); });
+  editor.addEventListener('input', function () {
+    if (lang) codeMem[lang] = editor.value;
+    if (bandLine && !dbg) clearBand();
+    renderHL();
+  });
+
+  /* ---------- Symbol badges ---------- */
+  function makeBadge(L, small) {
+    var b = el('span', 'badge' + (small ? ' sm' : ''));
+    b.style.background = L.color || '#3b5bdb';
+    b.setAttribute('aria-hidden', 'true');
+    if (L.iconUrl) {
+      var img = el('img'); img.src = L.iconUrl; img.alt = ''; b.appendChild(img);
+    } else {
+      var t = L.icon || L.label.charAt(0), n = Array.from(t).length;
+      b.textContent = t;
+      if (n === 2) b.classList.add('s2'); else if (n >= 3) b.classList.add('s3');
+    }
+    return b;
+  }
 
   /* ---------- Start screen and language buttons ---------- */
   var cardWrap = $('langCards'), pillWrap = $('langs');
@@ -600,32 +951,72 @@
     var L = LANGUAGES[key];
     var card = el('button', 'lang-card');
     card.type = 'button';
-    card.appendChild(el('span', 'lang-tag', L.tag || L.label));
-    card.appendChild(el('span', 'lang-name', L.label));
-    if (L.blurb) card.appendChild(el('span', 'lang-blurb', L.blurb));
+    card.appendChild(makeBadge(L, false));
+    var main = el('span', 'lc-main');
+    main.appendChild(el('span', 'lang-name', L.label));
+    if (L.blurb) main.appendChild(el('span', 'lang-blurb', L.blurb));
+    var tags = el('span', 'lc-tags');
+    tags.appendChild(L.runner === 'remote' ? el('span', 'tag', '☁ Online') : el('span', 'tag fast', '⚡ Instant'));
+    if (hasQuiz(key)) tags.appendChild(el('span', 'tag', 'Quiz'));
+    main.appendChild(tags);
+    card.appendChild(main);
+    card.dataset.search = (L.label + ' ' + key + ' ' + (L.blurb || '')).toLowerCase();
     card.addEventListener('click', function () { chooseLanguage(key); });
+    var warmed = false;
+    function w() { if (!warmed) { warmed = true; warm(key); } }
+    card.addEventListener('mouseenter', w); card.addEventListener('touchstart', w, { passive: true }); card.addEventListener('focus', w);
     cardWrap.appendChild(card);
+    cards[key] = card;
+  });
+
+  var searchBox = $('langSearch');
+  function applySearch() {
+    var q = searchBox.value.trim().toLowerCase(), shown = 0;
+    langKeys.forEach(function (k) {
+      var hit = !q || cards[k].dataset.search.indexOf(q) > -1;
+      cards[k].classList.toggle('nomatch', !hit);
+      if (hit && !cards[k].classList.contains('unavail')) shown++;
+    });
+    $('noMatch').hidden = shown > 0;
+  }
+  searchBox.addEventListener('input', applySearch);
+  searchBox.addEventListener('keydown', function (e) {
+    if (e.key !== 'Enter') return;
+    for (var i = 0; i < langKeys.length; i++) {
+      var c = cards[langKeys[i]];
+      if (!c.classList.contains('nomatch') && !c.classList.contains('unavail')) { chooseLanguage(langKeys[i]); return; }
+    }
   });
 
   var homeBtn = el('button', 'pill home', 'All languages');
   homeBtn.type = 'button';
   homeBtn.addEventListener('click', function () {
     if (!confirmLeaveQuiz()) return;
+    exitDebug();
     quiz = null;
     $('workspace').hidden = true;
     $('welcome').hidden = false;
   });
   pillWrap.appendChild(homeBtn);
   langKeys.forEach(function (key) {
-    var b = el('button', 'pill', LANGUAGES[key].label);
+    var L = LANGUAGES[key];
+    var b = el('button', 'pill');
     b.type = 'button';
     b.dataset.lang = key;
+    b.appendChild(makeBadge(L, true));
+    b.appendChild(document.createTextNode(L.label));
     b.addEventListener('click', function () {
       if (key !== lang && !confirmLeaveQuiz()) return;
       setLanguage(key);
     });
     pillWrap.appendChild(b);
+    pills[key] = b;
   });
+  pillWrap.addEventListener('wheel', function (e) {
+    if (pillWrap.scrollWidth > pillWrap.clientWidth && Math.abs(e.deltaY) > Math.abs(e.deltaX)) {
+      pillWrap.scrollLeft += e.deltaY; e.preventDefault();
+    }
+  }, { passive: false });
 
   function confirmLeaveQuiz() {
     return !(quiz && !quiz.finished && quiz.i > 0) ||
@@ -637,62 +1028,82 @@
     $('workspace').hidden = false;
     setLanguage(key, true);
     setMode('runner');
+    warm(key);
     editor.focus();
   }
 
-  /* tabs */
   function setMode(m) {
+    mode = m;
     $('runnerPanel').hidden = m !== 'runner';
     $('quizPanel').hidden = m !== 'quiz';
     $('tabRunner').setAttribute('aria-selected', String(m === 'runner'));
     $('tabQuiz').setAttribute('aria-selected', String(m === 'quiz'));
+    if (m === 'runner' && lang) { renderHL(); positionBand(); }
   }
   $('tabRunner').addEventListener('click', function () { setMode('runner'); });
   $('tabQuiz').addEventListener('click', function () { setMode('quiz'); });
 
+  function updateStdinVisibility() {
+    var L = LANGUAGES[lang];
+    stdinWrap.hidden = !!dbg || L.runner === 'javascript' || L.runner === 'sql';
+  }
+
   function setLanguage(key, force) {
     if (!force && key === lang) return;
+    exitDebug();
     if (lang) codeMem[lang] = editor.value;
     lang = key;
     var L = LANGUAGES[lang];
     Array.prototype.forEach.call(pillWrap.querySelectorAll('.pill[data-lang]'), function (b) {
       b.setAttribute('aria-pressed', String(b.dataset.lang === lang));
     });
+    var active = pills[lang];
+    if (active) {                                       /* scroll the row sideways only (never the page) */
+      var target = active.offsetLeft - (pillWrap.clientWidth - active.offsetWidth) / 2;
+      pillWrap.scrollLeft = Math.max(0, target);
+    }
     editor.value = codeMem[lang] !== undefined ? codeMem[lang] : (STARTER_CODE[lang] || '');
     editor.scrollTop = 0; editor.scrollLeft = 0;
+    clearBand();
     renderHL();
     $('editorLang').textContent = L.label;
-    var usesInput = L.runner !== 'javascript' && L.runner !== 'sql';
-    stdinBox.hidden = !usesInput;
+    updateStdinVisibility();
     $('resetDbBtn').hidden = L.runner !== 'sql';
     var note = $('runnerNote');
     if (L.runner === 'remote') {
       note.hidden = false;
-      note.textContent = L.label + ' is compiled by an online compiler service (set in settings.js), so it needs an internet connection and a working service address.';
+      note.textContent = L.label + ' is compiled by a free online compiler service, so it needs an internet connection and can be slower than Python or JavaScript (which run instantly inside your browser).';
     } else {
       note.hidden = true;
     }
+    $('tabQuiz').hidden = !hasQuiz(lang);
+    if (!hasQuiz(lang) && mode === 'quiz') setMode('runner');
     clearOutput();
-    statusEl.textContent = '';
+    outputBox.appendChild(el('span', 'muted', 'Press Run to see the output here.'));
+    endRun('');
     resetQuizView();
   }
 
   $('resetCodeBtn').addEventListener('click', function () {
-    if (window.confirm('Replace your code with the welcome program?')) {
-      editor.value = STARTER_CODE[lang] || '';
-      codeMem[lang] = editor.value;
+    var fresh = STARTER_CODE[lang] || '';
+    if (editor.value === fresh || window.confirm('Replace your code with the welcome program?')) {
+      exitDebug();
+      editor.value = fresh;
+      codeMem[lang] = fresh;
+      clearBand();
       renderHL();
     }
   });
-  runBtn.addEventListener('click', run);
+  runBtn.addEventListener('click', function () { execute(false); });
+  debugBtn.addEventListener('click', function () { execute(true); });
 
   /* ---------- Editor helpers: auto-close brackets, auto-indent, Tab ---------- */
   var PAIRS = { '(': ')', '[': ']', '{': '}', '"': '"', "'": "'", '`': '`' };
   var CLOSERS = ')]}"\'`';
   var busy = false;
   function isWord(ch) { return !!ch && /[A-Za-z0-9_]/.test(ch); }
+  function pairsOff(ch) { return (ch === "'" && NO_SQ_PAIR[lang]) || (ch === '`' && NO_BT_PAIR[lang]); }
 
-  /* Replace text between s and e. execCommand keeps Ctrl+Z (undo) working. */
   function replaceRange(s, e, text, caretStart, caretEnd) {
     editor.setSelectionRange(s, e);
     var ok = false;
@@ -709,11 +1120,9 @@
 
   function handleChar(e, ch, v, s, en) {
     var auto = EDIT.autoCloseBrackets !== false;
-    /* typing a closing character right before the same one just steps over it */
-    if (auto && s === en && CLOSERS.indexOf(ch) > -1 && v.charAt(s) === ch) {
+    if (auto && s === en && CLOSERS.indexOf(ch) > -1 && v.charAt(s) === ch && !pairsOff(ch)) {
       e.preventDefault(); editor.setSelectionRange(s + 1, s + 1); return;
     }
-    /* a } typed on a line that only holds spaces moves one level left */
     if (ch === '}' && EDIT.autoIndent !== false && s === en) {
       var ls = v.lastIndexOf('\n', s - 1) + 1, before = v.slice(ls, s);
       if (before.length > 0 && /^ +$/.test(before)) {
@@ -723,9 +1132,9 @@
         return;
       }
     }
-    if (auto && PAIRS[ch]) {
+    if (auto && PAIRS[ch] && !pairsOff(ch)) {
       var close = PAIRS[ch], isQuote = ch === close, prev = v.charAt(s - 1), next = v.charAt(s);
-      if (s !== en) {                                   /* wrap the selected text */
+      if (s !== en) {
         e.preventDefault();
         var sel = v.slice(s, en);
         replaceRange(s, en, ch + sel + close, s + 1, s + 1 + sel.length);
@@ -741,37 +1150,53 @@
   function handleEnter(v, s, en) {
     var ls = v.lastIndexOf('\n', s - 1) + 1;
     var line = v.slice(ls, s);
-    var indent = line.match(/^[ \t]*/)[0];
-    var trimmed = line.replace(/\s+$/, '');
+    var indent = line.match(/^[ \t]*/)[0], origLen = indent.length;
+    var cfg = SYNTAX[lang] || {};
+    var code = line;
+    (cfg.line || []).forEach(function (t) { var i = code.indexOf(t); if (i > -1) code = code.slice(0, i); });
+    var trimmed = code.replace(/\s+$/, '');
     var last = trimmed.slice(-1), after = v.charAt(en);
-    var isPy = LANGUAGES[lang].runner === 'python';
-    var isComment = isPy ? /^\s*#/.test(line) : /^\s*(\/\/|--)/.test(line);
-    var extra = '';
-    if (!isComment && (last === '{' || last === '(' || last === '[' || (isPy && last === ':'))) extra = UNIT;
-    if (isPy && !extra && /^\s*(return|pass|break|continue|raise)\b/.test(line) && indent.length >= UNIT.length) {
-      indent = indent.slice(0, indent.length - UNIT.length);
+    var isComment = trimmed === '' && /\S/.test(line);
+    var rule = INDENT[lang], extra = '', fixed = false;
+    if (!isComment) {
+      if (last && '{(['.indexOf(last) > -1) extra = UNIT;
+      if (lang === 'python' && last === ':') extra = UNIT;
+      if (rule) {
+        if (rule.close && rule.close.test(trimmed) && indent.length >= UNIT.length) { indent = indent.slice(0, indent.length - UNIT.length); fixed = true; }
+        if (rule.open && rule.open.test(trimmed) && !(rule.noOpen && rule.noOpen.test(trimmed))) extra = UNIT;
+        if (rule.balance) {
+          var o = (trimmed.match(/\(/g) || []).length, c = (trimmed.match(/\)/g) || []).length;
+          if (o > c) extra = UNIT;
+        }
+      }
+      if (lang === 'python' && !extra && /^\s*(return|pass|break|continue|raise)\b/.test(line) && indent.length >= UNIT.length) {
+        indent = indent.slice(0, indent.length - UNIT.length);
+      }
     }
     var closer = { '{': '}', '(': ')', '[': ']' }[last];
     var text, caret;
-    if (extra && closer && after === closer) {          /* Enter between { and } opens a block */
+    if (extra && closer && after === closer && !fixed) {
       text = '\n' + indent + extra + '\n' + indent;
       caret = s + 1 + indent.length + extra.length;
+      replaceRange(s, en, text, caret);
+    } else if (fixed) {
+      text = indent + line.slice(origLen) + '\n' + indent + extra;
+      replaceRange(ls, en, text, ls + text.length);
     } else {
       text = '\n' + indent + extra;
-      caret = s + text.length;
+      replaceRange(s, en, text, s + text.length);
     }
-    replaceRange(s, en, text, caret);
   }
 
   editor.addEventListener('beforeinput', function (e) {
-    if (busy || e.isComposing) return;
+    if (busy || e.isComposing || dbg) return;
     var t = e.inputType, v = editor.value, s = editor.selectionStart, en = editor.selectionEnd;
     if (t === 'insertText' && typeof e.data === 'string' && e.data.length === 1) {
       handleChar(e, e.data, v, s, en);
     } else if ((t === 'insertLineBreak' || t === 'insertParagraph') && EDIT.autoIndent !== false) {
       e.preventDefault(); handleEnter(v, s, en);
     } else if (t === 'deleteContentBackward' && EDIT.autoCloseBrackets !== false && s === en && s > 0) {
-      if (PAIRS[v.charAt(s - 1)] && PAIRS[v.charAt(s - 1)] === v.charAt(s)) {   /* backspace inside () deletes both */
+      if (PAIRS[v.charAt(s - 1)] && PAIRS[v.charAt(s - 1)] === v.charAt(s) && !pairsOff(v.charAt(s - 1))) {
         e.preventDefault(); replaceRange(s - 1, s + 1, '', s - 1);
       }
     }
@@ -780,12 +1205,13 @@
   var escPressed = false;
   editor.addEventListener('keydown', function (e) {
     if (e.key === 'Escape') { escPressed = true; return; }
-    if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') { e.preventDefault(); run(); return; }
+    if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') { e.preventDefault(); execute(false); return; }
+    if (dbg) return;
     if (e.key === 'Tab') {
-      if (escPressed) { escPressed = false; return; }       /* Esc then Tab leaves the editor */
+      if (escPressed) { escPressed = false; return; }
       e.preventDefault();
       var v = editor.value, s = editor.selectionStart, en = editor.selectionEnd;
-      if (e.shiftKey) {                                     /* Shift+Tab: move this line one level left */
+      if (e.shiftKey) {
         var ls = v.lastIndexOf('\n', s - 1) + 1, k = 0;
         while (k < UNIT.length && v.charAt(ls + k) === ' ') k++;
         if (k > 0) replaceRange(ls, ls + k, '', Math.max(ls, s - k));
@@ -797,9 +1223,27 @@
     escPressed = false;
   });
 
+  /* ---------- Status line with a live timer ---------- */
+  var runStart = 0, runTimer = null, statusMsg = '';
+  function tick() { statusEl.textContent = statusMsg + ' ' + ((performance.now() - runStart) / 1000).toFixed(1) + ' s'; }
+  function beginRun(msg) {
+    statusMsg = msg; runStart = performance.now(); statusEl.className = '';
+    clearInterval(runTimer); runTimer = setInterval(tick, 100); tick();
+  }
+  function endRun(text, cls) {
+    clearInterval(runTimer); runTimer = null;
+    statusEl.textContent = text || ''; statusEl.className = cls || '';
+  }
+
   /* ---------- Output ---------- */
   function clearOutput() { outputBox.textContent = ''; }
-  function setStatus(t) { statusEl.textContent = t; }
+
+  function parseErrorLine(text) {
+    var m = /\bprog\.\w+[:(](\d+)/.exec(text) || /File "<exec>", line (\d+)/.exec(text);
+    if (!m) { var all = text.match(/File "<exec>", line (\d+)/g); if (all) m = /(\d+)$/.exec(all[all.length - 1]); }
+    if (!m) m = /\b[Ll]ine[ :]+(\d+)/.exec(text) || /(?:^|[\s(])[\w.\/-]+\.\w{1,6}:(\d+)(?::\d+)?/.exec(text);
+    return m ? parseInt(m[1], 10) : 0;
+  }
 
   function showResult(r, ms) {
     clearOutput();
@@ -809,34 +1253,75 @@
     if (r.stderr) { outputBox.appendChild(el('pre', 'err', r.stderr)); any = true; }
     if (!any) outputBox.appendChild(el('span', 'muted', '(The program finished and printed nothing.)'));
     var t = (ms / 1000).toFixed(2) + ' s';
-    setStatus(r.stderr ? 'Finished with errors · ' + t : 'Finished · ' + t);
+    var line = r.stderr ? (r.errLine || parseErrorLine(r.stderr)) : 0;
+    var total = editor.value.split('\n').length;
+    if (line > total) line = 0;
+    if (line) {
+      showBand(line, 'err'); scrollToLine(line);
+      var p = el('p'); p.style.margin = '6px 0 0';
+      var b = el('button', 'goto', 'Go to line ' + line);
+      b.type = 'button';
+      b.addEventListener('click', function () { scrollToLine(line); editor.focus(); });
+      p.appendChild(b); outputBox.appendChild(p);
+    }
+    endRun((r.stderr ? 'Finished with errors · ' : 'Finished · ') + t + (line ? ' · error on line ' + line : ''), r.stderr ? 'bad' : 'ok');
   }
 
-  async function run() {
-    if (running) return;
-    running = true; runBtn.disabled = true;
+  /* ---------- Run / Debug ---------- */
+  function setRunning(b) { running = b; runBtn.disabled = b; debugBtn.disabled = b; }
+
+  async function execute(wantDebug) {
+    if (running || !lang) return;
+    exitDebug();
+    clearBand();
+    var L = LANGUAGES[lang], code = editor.value, input = stdinBox.value;
+    var canStep = L.runner === 'python' || L.runner === 'javascript';
+    setRunning(true);
     clearOutput();
-    setStatus('Running...');
+    var note = $('runnerNote');
+    if (wantDebug && !canStep) {
+      note.hidden = false;
+      note.textContent = 'Step-by-step debugging works for Python and JavaScript. For ' + L.label + ', Debug runs the program and marks the line where an error happens.';
+    }
+    beginRun(wantDebug && canStep ? 'Tracing...' : (L.runner === 'remote' ? 'Running online...' : 'Running...'));
     var t0 = performance.now();
-    var L = LANGUAGES[lang];
-    var code = editor.value;
-    var input = stdinBox.value;
     try {
-      var r;
-      if (L.runner === 'javascript') r = await runJS(code);
-      else if (L.runner === 'python') r = await runPython(code, input);
-      else if (L.runner === 'sql') r = await runSQL(code);
-      else r = await runRemote(L, code, input);
-      showResult(r, performance.now() - t0);
+      if (wantDebug && canStep) {
+        var d = L.runner === 'python' ? await pyDebug(code, input) : await jsDebug(code);
+        if (d.steps.length === 0 && d.error) {
+          showResult({ stderr: d.error, errLine: d.errline }, performance.now() - t0);
+        } else {
+          endRun('');
+          enterDebug(d, code, L.runner);
+        }
+      } else {
+        var r;
+        if (L.runner === 'javascript') r = await runJS(code);
+        else if (L.runner === 'python') r = await runPython(code, input);
+        else if (L.runner === 'sql') r = await runSQL(code);
+        else r = await runRemote(L, code, input);
+        showResult(r, performance.now() - t0);
+      }
     } catch (err) {
       showResult({ stderr: String(err && err.message ? err.message : err) }, performance.now() - t0);
     } finally {
-      running = false; runBtn.disabled = false;
+      setRunning(false);
     }
   }
 
+  /* ---------- Warm-up: get engines ready before the first Run ---------- */
+  function warm(key) {
+    var L = LANGUAGES[key];
+    if (!L) return;
+    try {
+      if (L.runner === 'python') pyRequest('warm');
+      else if (L.runner === 'sql') ensureSQL().catch(noop);
+      else if (L.runner === 'remote' && COMPILER.provider === 'wandbox') ensureList().catch(noop);
+    } catch (e) {}
+  }
+
   /* ---------- JavaScript runner (inside a Web Worker, so loops can be stopped) ---------- */
-  var JS_WORKER_SRC = [
+  var JS_FMT_SRC = [
     "const fmt = (v) => {",
     "  if (typeof v === 'string') return v;",
     "  if (typeof v === 'function') return String(v);",
@@ -845,16 +1330,22 @@
     "  try { if (typeof v === 'object' && v !== null) return JSON.stringify(v); } catch (e) {}",
     "  return String(v);",
     "};",
+    "const AsyncFunction = Object.getPrototypeOf(async function () {}).constructor;"
+  ].join('\n');
+
+  var JS_WORKER_SRC = JS_FMT_SRC + '\n' + [
     "const send = (type, args) => self.postMessage({ type: type, text: args.map(fmt).join(' ') });",
     "const con = { log: (...a) => send('out', a), info: (...a) => send('out', a), debug: (...a) => send('out', a),",
     "              warn: (...a) => send('err', a), error: (...a) => send('err', a) };",
     "self.onmessage = async (e) => {",
     "  try {",
-    "    const AsyncFunction = Object.getPrototypeOf(async function () {}).constructor;",
     "    await new AsyncFunction('console', e.data.code)(con);",
     "    setTimeout(() => self.postMessage({ type: 'done' }), 300);",
     "  } catch (err) {",
-    "    self.postMessage({ type: 'err', text: (err && err.name) ? err.name + ': ' + err.message : String(err) });",
+    "    let line = 0;",
+    "    const m = /(?:<anonymous>|AsyncFunction):(\\d+):\\d+/.exec(String(err && err.stack));",
+    "    if (m) line = parseInt(m[1], 10) - 2;",
+    "    self.postMessage({ type: 'err', text: (err && err.name) ? err.name + ': ' + err.message : String(err), line: line, syntax: err instanceof SyntaxError });",
     "    self.postMessage({ type: 'done' });",
     "  }",
     "};"
@@ -864,11 +1355,12 @@
     return new Promise(function (resolve) {
       var url = URL.createObjectURL(new Blob([JS_WORKER_SRC], { type: 'text/javascript' }));
       var w = new Worker(url);
-      var out = [], err = [], done = false, timer;
+      var out = [], err = [], done = false, timer, errLine = 0, syntax = false;
       function finish() {
         if (done) return; done = true;
         clearTimeout(timer); w.terminate(); URL.revokeObjectURL(url);
-        resolve({ stdout: out.join('\n'), stderr: err.join('\n') });
+        if (syntax) err.push('Tip: press Debug to see which line has the mistake.');
+        resolve({ stdout: out.join('\n'), stderr: err.join('\n'), errLine: errLine });
       }
       timer = setTimeout(function () {
         err.push('Stopped: the program ran for more than ' + SITE.runTimeoutSeconds + ' seconds (maybe an infinite loop).');
@@ -877,7 +1369,7 @@
       w.onmessage = function (e) {
         var m = e.data;
         if (m.type === 'out') out.push(m.text);
-        else if (m.type === 'err') err.push(m.text);
+        else if (m.type === 'err') { err.push(m.text); if (m.line && !errLine) errLine = m.line; if (m.syntax) syntax = true; }
         else if (m.type === 'done') finish();
       };
       w.onerror = function (e) { err.push(e.message || 'The program could not run.'); if (e.preventDefault) e.preventDefault(); finish(); };
@@ -885,26 +1377,199 @@
     });
   }
 
-  /* ---------- Python runner (Pyodide in a Web Worker) ---------- */
+  /* JavaScript debugger: the code is rewritten (with acorn) so that every statement reports its line and variables. */
+  function clInstrument(code, acorn) {
+    var ast = acorn.parse(code, { ecmaVersion: 'latest', locations: true, allowAwaitOutsideFunction: true, allowReturnOutsideFunction: true });
+    var inserts = [], seq = 0;
+    function add(pos, order, text) { inserts.push({ pos: pos, order: order, seq: seq++, text: text }); }
+    function patNames(p, out) {
+      if (!p) return;
+      switch (p.type) {
+        case 'Identifier': out.push(p.name); break;
+        case 'ObjectPattern': p.properties.forEach(function (q) { patNames(q.type === 'Property' ? q.value : q.argument, out); }); break;
+        case 'ArrayPattern': p.elements.forEach(function (q) { patNames(q, out); }); break;
+        case 'AssignmentPattern': patNames(p.left, out); break;
+        case 'RestElement': patNames(p.argument, out); break;
+      }
+    }
+    function isFn(n) { return n.type === 'FunctionDeclaration' || n.type === 'FunctionExpression' || n.type === 'ArrowFunctionExpression'; }
+    /* names declared in a function scope (not inside nested functions) */
+    function collect(node, out) {
+      if (!node || typeof node.type !== 'string') return;
+      switch (node.type) {
+        case 'VariableDeclaration': node.declarations.forEach(function (d) { patNames(d.id, out); }); break;
+        case 'FunctionDeclaration': if (node.id) out.push(node.id.name); return;
+        case 'ClassDeclaration': if (node.id) out.push(node.id.name); return;
+        case 'FunctionExpression': case 'ArrowFunctionExpression': case 'ClassExpression': return;
+        case 'CatchClause': patNames(node.param, out); break;
+      }
+      for (var k in node) {
+        if (k === 'loc' || k === 'type' || k === 'start' || k === 'end') continue;
+        var v = node[k];
+        if (Array.isArray(v)) v.forEach(function (c) { if (c && typeof c.type === 'string') collect(c, out); });
+        else if (v && typeof v.type === 'string') collect(v, out);
+      }
+    }
+    function uniq(a) { var seen = {}, r = []; a.forEach(function (x) { if (!seen[x]) { seen[x] = 1; r.push(x); } }); return r; }
+    function stepText(node, vis) { return '__s(' + node.loc.start.line + ',' + JSON.stringify(vis) + ',function(n){return eval(n)});'; }
+    function list(stmts, vis) {
+      stmts.forEach(function (s) {
+        if (!(s.type === 'ExpressionStatement' && s.directive)) add(s.start, 1, stepText(s, vis));
+        visit(s, vis);
+      });
+    }
+    function body(b, vis) {
+      if (!b) return;
+      if (b.type === 'BlockStatement') { visit(b, vis); return; }
+      add(b.start, 1, '{' + stepText(b, vis));
+      add(b.end, 0, '}');
+      visit(b, vis);
+    }
+    function visit(node, vis) {
+      if (!node || typeof node.type !== 'string') return;
+      switch (node.type) {
+        case 'FunctionDeclaration': case 'FunctionExpression': case 'ArrowFunctionExpression': {
+          var nm = [];
+          node.params.forEach(function (p) { patNames(p, nm); });
+          if (node.type === 'FunctionExpression' && node.id) nm.push(node.id.name);
+          if (node.body.type === 'BlockStatement') node.body.body.forEach(function (s) { collect(s, nm); }); else collect(node.body, nm);
+          var v2 = uniq(vis.concat(nm));
+          node.params.forEach(function (p) { visit(p, v2); });
+          if (node.body.type === 'BlockStatement') list(node.body.body, v2); else visit(node.body, v2);
+          return;
+        }
+        case 'BlockStatement': case 'StaticBlock': list(node.body, vis); return;
+        case 'SwitchCase': visit(node.test, vis); list(node.consequent, vis); return;
+        case 'ForStatement': visit(node.init, vis); visit(node.test, vis); visit(node.update, vis); loopBody(node.body, vis); return;
+        case 'ForInStatement': case 'ForOfStatement': visit(node.left, vis); visit(node.right, vis); loopBody(node.body, vis); return;
+        case 'WhileStatement': visit(node.test, vis); loopBody(node.body, vis); return;
+        case 'DoWhileStatement': loopBody(node.body, vis); visit(node.test, vis); return;
+        case 'IfStatement': visit(node.test, vis); body(node.consequent, vis); body(node.alternate, vis); return;
+        case 'WithStatement': visit(node.object, vis); body(node.body, vis); return;
+      }
+      for (var k in node) {
+        if (k === 'loc' || k === 'type' || k === 'start' || k === 'end') continue;
+        var v = node[k];
+        if (Array.isArray(v)) v.forEach(function (c) { visit(c, vis); });
+        else if (v && typeof v.type === 'string') visit(v, vis);
+      }
+    }
+    function loopBody(b, vis) {
+      if (b.type === 'BlockStatement' && b.body.length === 0) add(b.start + 1, 1, stepText(b, vis));   /* empty loop body still counts a step */
+      body(b, vis);
+    }
+    var top = [];
+    ast.body.forEach(function (s) { collect(s, top); });
+    var vis0 = uniq(top);
+    list(ast.body, vis0);
+    inserts.sort(function (a, b) { return (a.pos - b.pos) || (a.order - b.order) || (a.seq - b.seq); });
+    var out = '', last = 0;
+    inserts.forEach(function (ins) { out += code.slice(last, ins.pos) + ins.text; last = ins.pos; });
+    return out + code.slice(last);
+  }
+  var JS_DEBUG_SRC = "importScripts('" + ACORN_URL + "');\n" + JS_FMT_SRC + "\nconst clInstrument = " + clInstrument.toString() + ";\n" + [
+    "const short = (v) => {",
+    "  let r;",
+    "  try {",
+    "    if (typeof v === 'string') r = JSON.stringify(v);",
+    "    else if (typeof v === 'function') r = (/^class\\b/.test(Function.prototype.toString.call(v)) ? '<class ' : '<function ') + v.name + '>';",
+    "    else if (typeof v === 'symbol') r = v.toString();",
+    "    else if (v instanceof Error) r = v.name + ': ' + v.message;",
+    "    else if (v instanceof Map) r = 'Map(' + v.size + ') ' + JSON.stringify(Array.from(v));",
+    "    else if (v instanceof Set) r = 'Set(' + v.size + ') ' + JSON.stringify(Array.from(v));",
+    "    else if (typeof v === 'object' && v !== null) r = JSON.stringify(v);",
+    "    else r = String(v);",
+    "  } catch (e) { try { r = String(v); } catch (e2) { r = '<unprintable>'; } }",
+    "  if (typeof r !== 'string') r = String(v);",
+    "  return r.length > 80 ? r.slice(0, 77) + '...' : r;",
+    "};",
+    "self.onmessage = async (e) => {",
+    "  const code = e.data.code, max = e.data.max;",
+    "  const steps = [], out = [];",
+    "  let error = null, errLine = null, truncated = false, sent = false;",
+    "  const report = () => { if (sent) return; sent = true; self.postMessage({ type: 'debug', data: { steps: steps, out: out, error: error, errline: errLine, truncated: truncated } }); };",
+    "  const __s = (l, names, ev) => {",
+    "    if (steps.length >= max) { truncated = true; report(); self.close(); throw new Error('Step limit'); }",
+    "    const v = {};",
+    "    for (const n of names) { try { v[n] = short(ev(n)); } catch (_) {} }",
+    "    steps.push({ l: l, v: v });",
+    "  };",
+    "  const add = (a) => out.push([steps.length, a.map(fmt).join(' ') + '\\n']);",
+    "  const con = { log: (...a) => add(a), info: (...a) => add(a), debug: (...a) => add(a), warn: (...a) => add(a), error: (...a) => add(a) };",
+    "  let src;",
+    "  try { src = clInstrument(code, acorn); }",
+    "  catch (err) {",
+    "    error = 'SyntaxError: ' + String(err && err.message).replace(/\\s*\\(\\d+:\\d+\\)$/, '');",
+    "    errLine = err && err.loc ? err.loc.line : null;",
+    "    report(); return;",
+    "  }",
+    "  try { await new AsyncFunction('console', '__s', src)(con, __s); }",
+    "  catch (err) {",
+    "    if (!truncated) {",
+    "      error = (err && err.name) ? err.name + ': ' + err.message : String(err);",
+    "      errLine = steps.length ? steps[steps.length - 1].l : null;",
+    "    }",
+    "  }",
+    "  setTimeout(report, error ? 0 : 300);",
+    "};"
+  ].join('\n');
+
+  function jsDebug(code) {
+    return new Promise(function (resolve, reject) {
+      var url = URL.createObjectURL(new Blob([JS_DEBUG_SRC], { type: 'text/javascript' }));
+      var w = new Worker(url), done = false, timer;
+      function finish(fn, v) { if (done) return; done = true; clearTimeout(timer); w.terminate(); URL.revokeObjectURL(url); fn(v); }
+      timer = setTimeout(function () {
+        finish(reject, new Error('Stopped: the program ran for more than ' + (SITE.runTimeoutSeconds * 2) + ' seconds while tracing (maybe an infinite loop).'));
+      }, SITE.runTimeoutSeconds * 2000);
+      w.onmessage = function (e) { if (e.data.type === 'debug') finish(resolve, e.data.data); };
+      w.onerror = function (e) {
+        if (e.preventDefault) e.preventDefault();
+        finish(reject, new Error('Could not load the debugger helper (acorn). Check your internet connection and try again.'));
+      };
+      w.postMessage({ code: code, max: MAX_STEPS });
+    });
+  }
+
+  /* ---------- Python (Pyodide in a Web Worker; also hosts the Python tracer) ---------- */
   var PY_WORKER_SRC = [
     "importScripts('" + PYODIDE_BASE + "pyodide.js');",
-    "let pyodide = null;",
+    "const DEBUG_PY = " + JSON.stringify(PY_DEBUG_SRC) + ";",
+    "let pyodide = null, loading = null, tracerReady = false;",
     "const post = (type, text) => self.postMessage({ type: type, text: text });",
+    "function ensure() {",
+    "  if (!loading) {",
+    "    post('status', 'Loading Python (about 10 MB, first time only)...');",
+    "    loading = loadPyodide({ indexURL: '" + PYODIDE_BASE + "' }).then((p) => { pyodide = p; return p; });",
+    "    loading.catch(() => { loading = null; });",
+    "  }",
+    "  return loading;",
+    "}",
     "self.onmessage = async (e) => {",
-    "  const code = e.data.code, stdin = e.data.stdin;",
+    "  const d = e.data;",
     "  try {",
-    "    if (!pyodide) {",
-    "      post('status', 'Loading Python for the first time (about 10 MB)...');",
-    "      pyodide = await loadPyodide({ indexURL: '" + PYODIDE_BASE + "' });",
+    "    await ensure();",
+    "    if (d.mode === 'warm') { post('ready', ''); return; }",
+    "    try {",
+    "      if (/^\\s*(import|from)\\s/m.test(d.code)) { post('status', 'Checking imports...'); await pyodide.loadPackagesFromImports(d.code); }",
+    "    } catch (x) {}",
+    "    post('running', '');",
+    "    if (d.mode === 'debug') {",
+    "      if (!tracerReady) { pyodide.runPython(DEBUG_PY); tracerReady = true; }",
+    "      const fn = pyodide.globals.get('__cl_debug');",
+    "      const r = fn(d.code, d.stdin || '', d.max);",
+    "      if (fn.destroy) fn.destroy();",
+    "      post('debug', r);",
+    "      post('done', '');",
+    "      return;",
     "    }",
-    "    post('running', 'Running...');",
-    "    const lines = stdin.length ? stdin.split('\\n') : [];",
+    "    const lines = d.stdin && d.stdin.length ? d.stdin.split('\\n') : [];",
     "    let i = 0;",
     "    pyodide.setStdin({ stdin: () => (i < lines.length ? lines[i++] : undefined) });",
     "    pyodide.setStdout({ batched: (s) => post('out', s) });",
     "    pyodide.setStderr({ batched: (s) => post('err', s) });",
     "    const g = pyodide.globals.get('dict')();",
-    "    try { await pyodide.runPythonAsync(code, { globals: g }); } finally { g.destroy(); }",
+    "    try { await pyodide.runPythonAsync(d.code, { globals: g }); } finally { g.destroy(); }",
     "  } catch (err) {",
     "    post('err', String(err && err.message ? err.message : err));",
     "  }",
@@ -913,7 +1578,11 @@
   ].join('\n');
 
   var pyWorker = null, pyUrl = null;
-
+  function pyGet() {
+    if (!pyUrl) pyUrl = URL.createObjectURL(new Blob([PY_WORKER_SRC], { type: 'text/javascript' }));
+    if (!pyWorker) pyWorker = new Worker(pyUrl);
+    return pyWorker;
+  }
   function cleanTraceback(text) {
     var marker = 'File "<exec>"';
     var idx = text.indexOf(marker);
@@ -922,63 +1591,79 @@
     return 'Traceback (most recent call last):\n' + text.slice(lineStart);
   }
 
-  function runPython(code, stdin) {
+  /* mode: 'warm' | 'run' | 'debug' */
+  function pyRequest(modeName, code, stdin) {
     return new Promise(function (resolve) {
-      if (!pyUrl) pyUrl = URL.createObjectURL(new Blob([PY_WORKER_SRC], { type: 'text/javascript' }));
-      if (!pyWorker) pyWorker = new Worker(pyUrl);
-      var w = pyWorker;
-      var out = [], err = [], done = false, timer = null;
+      var w = pyGet(), out = [], err = [], dbgJson = null, done = false, timer = null;
       function finish() {
-        if (done) return; done = true;
-        clearTimeout(timer);
-        var e = err.join('\n');
-        resolve({ stdout: out.join('\n'), stderr: e ? cleanTraceback(e) : '' });
+        if (done) return; done = true; clearTimeout(timer);
+        resolve({ stdout: out.join('\n'), stderr: err.join('\n'), debug: dbgJson });
       }
-      function killWorker() { w.terminate(); if (pyWorker === w) pyWorker = null; }
+      function kill() { w.terminate(); if (pyWorker === w) pyWorker = null; }
       w.onmessage = function (e) {
         var m = e.data;
-        if (m.type === 'status') setStatus(m.text);
+        if (m.type === 'status') { if (running) statusMsg = m.text; }
+        else if (m.type === 'ready') finish();
         else if (m.type === 'running') {
-          setStatus('Running...');
+          if (running) statusMsg = modeName === 'debug' ? 'Tracing...' : 'Running...';
+          var lim = SITE.runTimeoutSeconds * 1000 * (modeName === 'debug' ? 2 : 1);
           timer = setTimeout(function () {
-            err.push('Stopped: the program ran for more than ' + SITE.runTimeoutSeconds + ' seconds (maybe an infinite loop or waiting for input).');
-            killWorker(); finish();
-          }, SITE.runTimeoutSeconds * 1000);
+            err.push('Stopped: the program ran for more than ' + (lim / 1000) + ' seconds (maybe an infinite loop or waiting for input).');
+            kill(); finish();
+          }, lim);
         }
         else if (m.type === 'out') out.push(m.text);
         else if (m.type === 'err') err.push(m.text);
+        else if (m.type === 'debug') dbgJson = m.text;
         else if (m.type === 'done') finish();
       };
       w.onerror = function (e) {
         err.push('Could not load the Python engine. Check your internet connection and try again.');
         if (e.preventDefault) e.preventDefault();
-        killWorker(); finish();
+        kill(); finish();
       };
-      w.postMessage({ code: code, stdin: stdin });
+      w.postMessage({ mode: modeName, code: code, stdin: stdin, max: MAX_STEPS });
     });
   }
 
+  async function runPython(code, stdin) {
+    var r = await pyRequest('run', code, stdin);
+    var e = r.stderr;
+    return { stdout: r.stdout, stderr: e ? cleanTraceback(e) : '', errLine: e ? parseErrorLine(e) : 0 };
+  }
+  async function pyDebug(code, stdin) {
+    var r = await pyRequest('debug', code, stdin);
+    if (!r.debug) throw new Error(r.stderr || 'The Python debugger did not answer.');
+    return JSON.parse(r.debug);
+  }
+
   /* ---------- SQL runner (sql.js, in the browser) ---------- */
-  var SQL = null, sqlDb = null;
-  async function ensureSQL() {
-    if (!SQL) {
-      setStatus('Loading the SQL engine...');
-      await loadScript(SQLJS_BASE + 'sql-wasm.js');
-      SQL = await initSqlJs({ locateFile: function (f) { return SQLJS_BASE + f; } });
+  var SQL = null, sqlDb = null, sqlP = null;
+  function ensureSQL() {
+    if (!sqlP) {
+      sqlP = (async function () {
+        if (!SQL) {
+          if (running) statusMsg = 'Loading the SQL engine...';
+          await loadScript(SQLJS_BASE + 'sql-wasm.js');
+          SQL = await initSqlJs({ locateFile: function (f) { return SQLJS_BASE + f; } });
+        }
+        if (!sqlDb) {
+          sqlDb = new SQL.Database();
+          if (typeof SAMPLE_SQL !== 'undefined') sqlDb.exec(SAMPLE_SQL);
+        }
+      })();
+      sqlP.catch(function () { sqlP = null; });
     }
-    if (!sqlDb) {
-      sqlDb = new SQL.Database();
-      if (typeof SAMPLE_SQL !== 'undefined') sqlDb.exec(SAMPLE_SQL);
-    }
+    return sqlP;
   }
   $('resetDbBtn').addEventListener('click', async function () {
     try {
       await ensureSQL();
-      sqlDb.close(); sqlDb = null;
+      sqlDb.close(); sqlDb = null; sqlP = null;
       await ensureSQL();
       clearOutput();
       outputBox.appendChild(el('span', 'muted', 'Sample database restored.'));
-      setStatus('');
+      endRun('');
     } catch (e) {
       showResult({ stderr: String(e.message || e) }, 0);
     }
@@ -986,7 +1671,6 @@
 
   async function runSQL(code) {
     await ensureSQL();
-    setStatus('Running...');
     var results;
     try { results = sqlDb.exec(code); }
     catch (e) { return { stderr: 'SQL error: ' + (e.message || e) }; }
@@ -1014,48 +1698,115 @@
     return { node: frag };
   }
 
-  /* ---------- C / C++ / Java through an online compiler service ---------- */
-  var wandboxList = null;
-  async function wandboxCompilerFor(L, base) {
-    if (L.wandboxCompiler) return L.wandboxCompiler;
-    if (!wandboxList) {
-      var r = await fetch(base + '/list.json');
-      if (!r.ok) throw new Error('HTTP ' + r.status);
-      wandboxList = await r.json();
+  /* ---------- Other languages: a free online compiler service (Wandbox) ---------- */
+  var wbList = null, wbListP = null;
+  function wbBase() { return COMPILER.url.replace(/\/+$/, ''); }
+  function fetchT(url, opts, ms) {
+    var ctl = new AbortController(), t = setTimeout(function () { ctl.abort(); }, ms);
+    opts = opts || {}; opts.signal = ctl.signal;
+    return fetch(url, opts).then(function (r) { clearTimeout(t); return r; }, function (e) { clearTimeout(t); throw e; });
+  }
+  function readCachedList() {
+    try {
+      var o = JSON.parse(store('wblist') || 'null');
+      if (o && Array.isArray(o.l) && Date.now() - o.t < 12 * 3600 * 1000) {
+        return o.l.map(function (a) { return { name: a[0], language: a[1], version: a[2] }; });
+      }
+    } catch (e) {}
+    return null;
+  }
+  function ensureList() {
+    if (wbList) return Promise.resolve(wbList);
+    if (!wbListP) {
+      var c = readCachedList();
+      if (c && c.length) { wbList = c; wbListP = Promise.resolve(c); applyAvailability(c); return wbListP; }
+      wbListP = fetchT(wbBase() + '/list.json', null, 15000).then(function (r) {
+        if (!r.ok) throw new Error('HTTP ' + r.status);
+        return r.json();
+      }).then(function (j) {
+        if (!Array.isArray(j)) throw new Error('unexpected answer');
+        wbList = j;
+        store('wblist', JSON.stringify({ t: Date.now(), l: j.map(function (c) { return [c.name, c.language, c.version]; }) }));
+        applyAvailability(j);
+        return j;
+      });
+      wbListP.catch(function () { wbListP = null; });
     }
-    var cands = wandboxList.filter(function (c) { return c.language === L.wandboxLang; });
-    if (!cands.length) throw new Error('No ' + L.label + ' compiler found in the Wandbox list.');
-    var head = cands.filter(function (c) { return /head/.test(c.name); });
-    return (head.length ? head : cands)[0].name;
+    return wbListP;
+  }
+  function langMatches(entry, L) {
+    var lc = String(entry.language || '').toLowerCase();
+    return names(L).some(function (n) { return n.toLowerCase() === lc; });
+  }
+  /* Hide languages that the compiler service does not offer (only when the list looks sensible). */
+  function applyAvailability(list) {
+    var remote = langKeys.filter(function (k) { return LANGUAGES[k].runner === 'remote'; });
+    var found = remote.filter(function (k) { return list.some(function (c) { return langMatches(c, LANGUAGES[k]); }); });
+    if (!remote.length || found.length < remote.length / 2) return;
+    remote.forEach(function (k) {
+      var ok = found.indexOf(k) > -1;
+      if (cards[k]) cards[k].classList.toggle('unavail', !ok);
+      if (pills[k]) pills[k].classList.toggle('unavail', !ok);
+    });
+    applySearch();
+  }
+  function verCmp(a, b) {
+    var x = String(a || '').split(/[^0-9]+/).filter(Boolean).map(Number), y = String(b || '').split(/[^0-9]+/).filter(Boolean).map(Number);
+    for (var i = 0; i < Math.max(x.length, y.length); i++) { var d = (y[i] || 0) - (x[i] || 0); if (d) return d; }
+    return 0;
+  }
+  function candidates(L, list) {
+    var c = list.filter(function (e) { return langMatches(e, L); });
+    var heads = c.filter(function (e) { return /head/.test(e.name); });
+    var rest = c.filter(function (e) { return !/head/.test(e.name); }).sort(function (a, b) { return verCmp(a.version, b.version); });
+    return heads.concat(rest).slice(0, 3).map(function (e) { return e.name; });
+  }
+
+  async function postCompile(base, body, ms) {
+    var attempt = 0;
+    for (;;) {
+      try {
+        return await fetchT(base + '/compile.json', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: body }, ms);
+      } catch (e) {
+        if (e && e.name === 'AbortError') throw e;
+        if (++attempt > 1) throw e;                      /* one quick retry after a network hiccup */
+      }
+    }
   }
 
   async function runWandbox(L, code, stdin) {
-    var base = COMPILER.url.replace(/\/+$/, '');
-    var compiler, res;
-    /* Wandbox saves Java as prog.java, so a top-level "public class Main" would be rejected.
-       Quietly drop "public" from top-level declarations (lines that start at column 0). */
-    if (L.wandboxLang === 'Java') {
+    var base = wbBase(), ms = (SITE.remoteTimeoutSeconds || 25) * 1000;
+    /* Wandbox saves Java as prog.java, so a top-level "public class" would be rejected. */
+    if (names(L)[0] === 'Java') {
       code = code.replace(/^public\s+((?:(?:final|abstract|sealed|strictfp)\s+)*(?:class|interface|enum|record)\b)/gm, '$1');
     }
-    try {
-      compiler = await wandboxCompilerFor(L, base);
-      res = await fetch(base + '/compile.json', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ compiler: compiler, code: code, stdin: stdin || '', save: false })
-      });
-    } catch (e) {
-      return { stderr: 'Could not reach the Wandbox compiler service (' + (e.message || e) + ').\nCheck your internet connection. If it keeps failing, the free service may be down or blocking requests: see COMPILER in settings.js for other options.' };
+    var list, cands;
+    try { list = await ensureList(); }
+    catch (e) { return { stderr: 'Could not reach the Wandbox compiler service (' + (e.message || e) + ').\nCheck your internet connection. If it keeps failing, the free service may be busy or down.' }; }
+    cands = candidates(L, list);
+    if (!cands.length) return { stderr: 'The free compiler service does not offer ' + L.label + ' right now.' };
+    var lastErr = '';
+    for (var i = 0; i < cands.length; i++) {
+      var res, text, data = null;
+      try {
+        res = await postCompile(base, JSON.stringify({ compiler: cands[i], code: code, stdin: stdin || '', save: false }), ms);
+        text = await res.text();
+      } catch (e) {
+        if (e && e.name === 'AbortError') return { stderr: 'The online compiler took longer than ' + (ms / 1000) + ' seconds and was stopped. The free service may be busy: try again in a moment.' };
+        return { stderr: 'Could not reach the Wandbox compiler service (' + (e.message || e) + ').\nCheck your internet connection. If it keeps failing, the free service may be busy or down.' };
+      }
+      try { data = JSON.parse(text); } catch (e) {}
+      if (!res.ok || !data) {
+        lastErr = 'The compiler service replied with an error (HTTP ' + res.status + '): ' + text.slice(0, 300);
+        if (res.status === 429) lastErr += '\nToo many requests: wait a few seconds and try again.';
+        continue;                                        /* try the next compiler version */
+      }
+      var failedToCompile = data.compiler_error && String(data.status) !== '0' && !data.program_output && !data.program_error;
+      var errText = [failedToCompile ? data.compiler_error : '', data.program_error].filter(Boolean).join('\n');
+      if (!failedToCompile && data.compiler_error) errText = data.compiler_error + (errText ? '\n' + errText : '');
+      return { stdout: data.program_output || '', stderr: errText };
     }
-    var text = await res.text(), data = null;
-    try { data = JSON.parse(text); } catch (e) {}
-    if (!res.ok || !data) {
-      return { stderr: 'The compiler service replied with an error (HTTP ' + res.status + '): ' + text.slice(0, 300) };
-    }
-    var failedToCompile = data.compiler_error && String(data.status) !== '0' && !data.program_output && !data.program_error;
-    var errText = [failedToCompile ? data.compiler_error : '', data.program_error].filter(Boolean).join('\n');
-    if (!failedToCompile && data.compiler_error) errText = data.compiler_error + (errText ? '\n' + errText : '');
-    return { stdout: data.program_output || '', stderr: errText };
+    return { stderr: lastErr };
   }
 
   async function runRemote(L, code, stdin) {
@@ -1069,21 +1820,19 @@
       body = { source_code: code, language_id: L.judge0Id, stdin: stdin || '' };
     } else {
       url = COMPILER.url;
-      var fileName = L.pistonName === 'java' ? 'Main.java' : undefined;
       var file = { content: code };
-      if (fileName) file.name = fileName;
+      if (L.pistonName === 'java') file.name = 'Main.java';
       body = { language: L.pistonName, version: L.pistonVersion || '*', files: [file], stdin: stdin || '' };
     }
     var res;
     try {
-      res = await fetch(url, { method: 'POST', headers: headers, body: JSON.stringify(body) });
+      res = await fetchT(url, { method: 'POST', headers: headers, body: JSON.stringify(body) }, (SITE.remoteTimeoutSeconds || 25) * 1000);
     } catch (e) {
       return { stderr: 'Could not reach the compiler service.\nCheck your internet connection and the COMPILER address in settings.js.' };
     }
-    var text = await res.text();
-    var data = null;
+    var text = await res.text(), data = null;
     try { data = JSON.parse(text); } catch (e) {}
-    if (!res.ok) {
+    if (!res.ok || !data) {
       var msg = (data && (data.message || data.error)) || text.slice(0, 300);
       return { stderr: 'The compiler service replied with an error (HTTP ' + res.status + '): ' + msg +
         '\nIt may need an API key, may be rate-limited, or may no longer be public. See COMPILER in settings.js.' };
@@ -1093,12 +1842,131 @@
       if (!errText && data.status && data.status.id !== 3) errText = data.status.description;
       return { stdout: data.stdout || '', stderr: errText };
     }
-    if (data.compile && data.compile.code !== 0) {
-      return { stderr: data.compile.output || data.compile.stderr || 'Compilation failed.' };
-    }
+    if (data.compile && data.compile.code !== 0) return { stderr: data.compile.output || data.compile.stderr || 'Compilation failed.' };
     var run = data.run || {};
     return { stdout: run.stdout || '', stderr: run.stderr || '' };
   }
+
+  /* ---------- Debugger view ---------- */
+  var dbgView = $('dbgView');
+  function stepSig(st) { return st.k ? st.k.join('>') : Object.keys(st.v).join(','); }
+
+  function enterDebug(d, code, runner) {
+    dbg = { steps: d.steps, out: d.out || [], error: d.error, errline: d.errline, truncated: d.truncated,
+            pos: 0, src: code.split('\n'), runner: runner, timer: null };
+    editorWrap.classList.add('debugging');
+    editor.readOnly = true;
+    outputBox.hidden = true; dbgView.hidden = false; stdinWrap.hidden = true;
+    $('outTitle').textContent = 'Debugger';
+    $('dbgStackWrap').hidden = runner !== 'python';
+    $('dbgSlider').max = dbg.steps.length;
+    renderDbg();
+  }
+
+  function exitDebug() {
+    if (!dbg) return;
+    clearInterval(dbg.timer);
+    dbg = null;
+    dbgView.hidden = true; outputBox.hidden = false;
+    editorWrap.classList.remove('debugging');
+    editor.readOnly = false;
+    $('outTitle').textContent = 'Output';
+    clearBand();
+    if (lang) updateStdinVisibility();
+  }
+
+  function dbgPlayStop() {
+    if (dbg && dbg.timer) { clearInterval(dbg.timer); dbg.timer = null; }
+    $('dbgPlay').innerHTML = '&#9654; Auto-play';
+  }
+
+  function renderDbg() {
+    var n = dbg.steps.length, p = dbg.pos, atEnd = p >= n, st = dbg.steps[p];
+    $('dbgSlider').value = p;
+    $('dbgPos').textContent = atEnd ? 'End · ' + n + ' steps' : 'Step ' + (p + 1) + ' of ' + n;
+    $('dbgFirst').disabled = $('dbgBack').disabled = p === 0;
+    $('dbgNext').disabled = $('dbgLast').disabled = atEnd;
+    if (atEnd) dbgPlayStop();
+
+    var info = $('dbgInfo'), cls = '', msg;
+    if (atEnd) {
+      if (dbg.error) { cls = 'err'; msg = 'Error: ' + dbg.error + (dbg.errline ? '   (line ' + dbg.errline + ')' : ''); }
+      else if (dbg.truncated) { cls = 'err'; msg = 'Stopped after ' + n + ' steps (the limit is maxDebugSteps in settings.js). The program may have an endless loop.'; }
+      else { cls = 'ok'; msg = 'The program finished.'; }
+      if (dbg.error && dbg.errline) { showBand(dbg.errline, 'err'); scrollToLine(dbg.errline); } else clearBand();
+    } else {
+      var src = (dbg.src[st.l - 1] || '').trim();
+      if (st.ev === 'return') {
+        msg = st.k && st.k.length === 1 ? 'Reached the end of the program.' : 'Line ' + st.l + ': returning ' + st.ret + ' from ' + st.k[st.k.length - 1] + '()';
+      } else {
+        msg = 'Line ' + st.l + ':  ' + src;
+      }
+      showBand(st.l, 'step'); scrollToLine(st.l);
+    }
+    info.className = cls; info.textContent = msg;
+
+    /* variables (changed ones are highlighted) */
+    var tb = $('dbgVars').tBodies[0];
+    tb.textContent = '';
+    var shown = st && !(atEnd && dbg.runner === 'javascript') ? st : (atEnd && n && dbg.runner === 'python' ? dbg.steps[n - 1] : null);
+    if (shown) {
+      var prev = null, sig = stepSig(shown), idx = dbg.steps.indexOf(shown);
+      if (!atEnd) { for (var q = idx - 1; q >= 0; q--) { if (stepSig(dbg.steps[q]) === sig) { prev = dbg.steps[q]; break; } } }
+      Object.keys(shown.v).forEach(function (name) {
+        var tr = el('tr');
+        if (!atEnd && (!prev || prev.v[name] !== shown.v[name])) tr.className = 'chg';
+        tr.appendChild(el('td', null, name));
+        tr.appendChild(el('td', null, shown.v[name]));
+        tb.appendChild(tr);
+      });
+    }
+    if (!tb.rows.length) {
+      var er = el('tr'), ec = el('td', 'dbg-empty', atEnd && dbg.runner === 'javascript' ? '(the program has finished)' : '(no variables yet)');
+      ec.colSpan = 2; er.appendChild(ec); tb.appendChild(er);
+    }
+
+    /* call stack (Python) */
+    var ol = $('dbgStack');
+    ol.textContent = '';
+    if (dbg.runner === 'python' && st) {
+      st.k.slice().reverse().forEach(function (nm, i) { ol.appendChild(el('li', null, nm + (i === 0 ? '   ← now here' : ''))); });
+    }
+    $('dbgStackWrap').hidden = dbg.runner !== 'python' || !st;
+
+    /* printed so far */
+    var printed = dbg.out.filter(function (c) { return atEnd || c[0] <= p; }).map(function (c) { return c[1]; }).join('');
+    var po = $('dbgOut');
+    po.textContent = printed;
+    po.classList.toggle('dbg-empty', !printed);
+    if (!printed) po.textContent = '(nothing printed yet)';
+  }
+
+  function dbgGo(to) {
+    if (!dbg) return;
+    dbg.pos = Math.max(0, Math.min(dbg.steps.length, to));
+    renderDbg();
+  }
+  $('dbgFirst').addEventListener('click', function () { dbgPlayStop(); dbgGo(0); });
+  $('dbgBack').addEventListener('click', function () { dbgPlayStop(); dbgGo(dbg.pos - 1); });
+  $('dbgNext').addEventListener('click', function () { dbgPlayStop(); dbgGo(dbg.pos + 1); });
+  $('dbgLast').addEventListener('click', function () { dbgPlayStop(); dbgGo(dbg.steps.length); });
+  $('dbgSlider').addEventListener('input', function () { dbgPlayStop(); dbgGo(parseInt(this.value, 10) || 0); });
+  $('dbgExit').addEventListener('click', exitDebug);
+  $('dbgPlay').addEventListener('click', function () {
+    if (!dbg) return;
+    if (dbg.timer) { dbgPlayStop(); return; }
+    if (dbg.pos >= dbg.steps.length) dbg.pos = 0;
+    $('dbgPlay').innerHTML = '&#10074;&#10074; Pause';
+    dbg.timer = setInterval(function () { if (!dbg) return; dbgGo(dbg.pos + 1); }, 650);
+    dbgGo(dbg.pos);
+  });
+  document.addEventListener('keydown', function (e) {
+    if (!dbg || $('workspace').hidden || mode !== 'runner') return;
+    if (e.target && (e.target.type === 'range' || e.target === stdinBox)) return;
+    var k = e.key;
+    if (k === 'ArrowRight' || k === 'ArrowDown') { e.preventDefault(); dbgPlayStop(); dbgGo(dbg.pos + 1); }
+    else if (k === 'ArrowLeft' || k === 'ArrowUp') { e.preventDefault(); dbgPlayStop(); dbgGo(dbg.pos - 1); }
+  });
 
   /* ---------- Quiz: rounds, new questions each time ---------- */
   var LETTERS = ['A', 'B', 'C', 'D', 'E', 'F'];
@@ -1315,6 +2183,9 @@
   /* ---------- Go: show the start screen ---------- */
   $('welcome').hidden = false;
   $('workspace').hidden = true;
+  if (COMPILER.provider === 'wandbox' && langKeys.some(function (k) { return LANGUAGES[k].runner === 'remote'; })) {
+    ensureList().catch(noop);          /* hides languages the free compiler does not offer, and warms the connection */
+  }
 })();
 </script>
 </body>

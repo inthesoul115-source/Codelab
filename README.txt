@@ -12,7 +12,14 @@ Undo your last change and try again. Edit with Notepad or VS Code, never Word.
 
 WHAT THE SITE DOES
   - Start screen: the visitor first chooses a language. The buttons at the top switch language later.
-  - Code runner: write code, press Run (or Ctrl+Enter), see the output.
+  - Code runner: Run, Debug and Reset code buttons sit above the editor and the Output panel, so everything is
+    visible without scrolling (phones too). Press Run or Ctrl+Enter.
+  - 30 languages, each with a symbol badge before its name. Start-screen search box; the row of language buttons
+    at the top scrolls sideways. (The badges are our own simple designs, not official logos.)
+  - DEBUG (Python and JavaScript): press Debug, then step with Next / Back (or the arrow keys), Auto-play, or the
+    slider. The current line is highlighted in the editor; you see the variables (changed ones glow), the call
+    stack (Python) and what has been printed so far. Exit debug to edit again. Other languages: Debug runs the program.
+  - When a program has an error, the line is marked red and "Go to line N" appears under the message.
   - Every language starts with a program that prints "Welcome to CodeLab". Edits are NOT saved:
     refreshing the page brings the welcome program back.
   - Syntax colours: keywords, types, functions, strings, numbers and comments are coloured.
@@ -39,6 +46,8 @@ CHANGE THINGS (settings.js)
   - Turn off auto brackets or auto indent: EDITOR.autoCloseBrackets, EDITOR.autoIndent
   - Sounds on/off by default, vibration:  SOUNDS.enabledByDefault, SOUNDS.vibrateOnWrong
   - Hide a language .................... delete its line inside LANGUAGES
+  - Change a symbol badge .............. icon and color of that language in LANGUAGES
+  - Max debugger steps ................. SITE.maxDebugSteps
 
 CHANGE THE QUIZ (questions.js)
   The instructions are at the top of that file. Each question has a  level  (1, 2 or 3 = the round).
@@ -46,12 +55,16 @@ CHANGE THE QUIZ (questions.js)
   To add a 4th round: give some questions  level: 4  and add a name to SITE.roundNames.
 
 WHAT RUNS WHERE
-  JavaScript ... in your browser (stops after 8 seconds to catch infinite loops)
-  Python ....... in your browser (Pyodide). First run downloads about 10 MB
+  JavaScript ... in your browser, instant (stops after 8 seconds to catch infinite loops)
+  Python ....... in your browser (Pyodide). First run downloads about 10 MB; it starts loading as soon as you
+                 point at the Python card, so the first Run is faster
   SQL .......... in your browser (SQLite) with a sample "students" table
-  C, C++, Java . need an online compiler service. Default: Wandbox (free, no key). It is a shared public
-                 service, so it can be slow, limited or change. For a busy site, run your own compiler server
+  All other languages (Java, C, C++, C#, Go, Rust ...) are compiled by a free online service, Wandbox (no key).
+                 It is shared and public, so it can take a few seconds or be busy. Languages Wandbox does not
+                 offer are hidden automatically. For instant results on a busy site, run your own compiler server
                  and put its address in settings.js -> COMPILER.
+  Quizzes exist for Python, JavaScript, Java, C, C++ and SQL. Other languages show no Quiz tab until you add
+  questions for them in questions.js.
   Never put a secret or paid key in settings.js on a public site: anyone can read that file.
 
 PUTTING IT ONLINE (free)
